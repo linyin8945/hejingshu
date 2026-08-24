@@ -1,8 +1,7 @@
-{
-  "id": "hejingshu",
+"id": "hejingshu",
   "name": "合卺书",
-  "version": "0.1.0",
-  "description": "中式婚礼仪式与婚书纪念插件：择良人、行嘉礼、共书婚誓、生成婚书与婚后纪年。",
+  "version": "0.4.0",
+  "description": "合卺书·大婚视觉版：接入正式红金婚礼素材，贯穿亲迎、却扇、出阁、华堂、拜礼、合卺、结发、婚誓、婚书、礼成、喜宴与婚后晨起。",
   "author": "linyin8945",
   "entry": "https://raw.githubusercontent.com/linyin8945/hejingshu/main/hejingshu.js",
   "hash": "",
