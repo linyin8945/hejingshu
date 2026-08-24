@@ -3,7 +3,7 @@
 
   const PLUGIN_ID = "hejingshu";
   const APP_ID = "hejingshu-home";
-  const VERSION = "0.5.0";
+  const VERSION = "0.5.1";
 
   const GOLD = "#D6B56A";
   const DEEP_RED = "#6F0D14";
@@ -665,6 +665,38 @@
 .hj-ai-line{margin-top:14px;font-size:13px;line-height:1.9;color:#f0dfbb}
 .hj-slow-reveal{animation:hjFade 1.2s ease both}
 
+.hj-gen-loading{
+  position:relative !important;
+  pointer-events:none !important;
+  opacity:.88 !important;
+  overflow:hidden !important;
+}
+.hj-gen-loading::before{
+  content:"";
+  display:inline-block;
+  width:13px;height:13px;
+  margin-right:8px;
+  border:1.8px solid currentColor;
+  border-right-color:transparent;
+  border-radius:50%;
+  vertical-align:-2px;
+  animation:hjSpin .75s linear infinite;
+}
+.hj-gen-loading::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(110deg,transparent 20%,rgba(255,255,255,.13) 45%,transparent 70%);
+  transform:translateX(-120%);
+  animation:hjShimmer 1.25s ease-in-out infinite;
+}
+@keyframes hjSpin{to{transform:rotate(360deg)}}
+@keyframes hjShimmer{to{transform:translateX(120%)}}
+.hj-help-close{
+  min-width:108px;
+}
+
+
 </style>`;
   }
 
@@ -807,9 +839,25 @@
           root.querySelector(".hj-help-sheet")?.remove();
           const s = document.createElement("div");
           s.className="hj-help-sheet";
-          s.innerHTML=`<h3>${esc(title)}</h3><p>${esc(text)}</p><div class="hj-actions"><button class="hj-secondary" data-action="close-help">知道了</button></div>`;
+          s.innerHTML=`<h3>${esc(title)}</h3><p>${esc(text)}</p><div class="hj-actions"><button class="hj-secondary hj-help-close" data-action="close-help">知道了</button></div>`;
           root.querySelector(".hj-shell").appendChild(s);
-          bind();
+          const closeBtn = s.querySelector("[data-action='close-help']");
+          closeBtn?.addEventListener("click",()=>s.remove(),{once:true});
+        }
+
+        function beginGenerating(el, label="正在生成") {
+          if (!el) return ()=>{};
+          const oldHtml = el.innerHTML;
+          const oldDisabled = el.disabled;
+          el.disabled = true;
+          el.classList.add("hj-gen-loading");
+          el.textContent = label;
+          return ()=>{
+            if (!el?.isConnected) return;
+            el.classList.remove("hj-gen-loading");
+            el.disabled = oldDisabled;
+            el.innerHTML = oldHtml;
+          };
         }
 
         async function loadBase() {
@@ -1511,9 +1559,12 @@
             asset:"pickupDoor",title:"朱门叩问",kicker:"亲 迎",
             line:"门没有立刻打开。今日第一问，不问礼数，只问真心。",
             help:"亲迎，是婚礼中由新郎亲自迎娶新娘的礼仪。这里的叩门互动是《合卺书》的现代化婚俗设计，用来让新郎真正表达“为什么今日来娶你”。",
-            actions:`<button class="hj-secondary" data-action="door-silent">不应他</button>
-                     <button class="hj-secondary" data-action="door-question">隔门问他</button>
-                     <button class="hj-primary" data-action="door-heart">让他拿出诚意</button>`,
+            actions:a.doorAnswer
+              ? `<button class="hj-secondary" data-action="door-question">再隔门问一句</button>
+                 <button class="hj-primary" data-action="door-open-v5">开门 · 去见他</button>`
+              : `<button class="hj-secondary" data-action="door-silent">不应他</button>
+                 <button class="hj-secondary" data-action="door-question">隔门问他</button>
+                 <button class="hj-primary" data-action="door-heart">让他拿出诚意</button>`,
             back:"procession",
             extra:a.doorAnswer?`<div style="position:absolute;left:24px;right:24px;top:24%;z-index:7;padding:16px;border-radius:16px;background:rgba(55,5,8,.70);border:1px solid rgba(238,207,129,.28);font-size:13px;line-height:1.95;color:#f2dfb9"><b>${esc(a.partnerMarriageName||partnerName())}</b>：${esc(a.doorAnswer)}</div>`:""
           });
@@ -1851,7 +1902,7 @@
         }
 
         function bind() {
-          view.querySelectorAll("[data-action]").forEach(el=>{
+          root.querySelectorAll("[data-action]").forEach(el=>{
             if(el.__hjBound) return; el.__hjBound=true;
             el.addEventListener("click",async()=>{
               const action=el.dataset.action;
@@ -1897,29 +1948,47 @@
                 return renderPreWeddingV5();
               }
               if(action==="gen-letter"){
-                if(state.loading)return; state.loading=true;el.disabled=true;el.textContent="他正在写……";
+                if(state.loading)return;
+                state.loading=true;
+                const doneLoading=beginGenerating(el,"他正在写婚前笺");
                 try{
                   const t=await weddingAwareText("现在是大婚前夜。你明日会亲自去迎娶 USER。写一封很短的婚前笺给她，像你本人，不要古风模板，不要夸张。哪怕你平时嘴硬或寡言，也要让她知道你明日会来。",150);
                   await saveArchive({preLetter:t,directorStage:"prewedding"});
                 }catch(_){toast("生成失败，请检查 AI 配置")}
-                state.loading=false;return renderPreWeddingV5();
+                finally{state.loading=false;doneLoading()}
+                return renderPreWeddingV5();
               }
               if(action==="start-pickup-v5"){await saveArchive({status:"wedding-day",directorStage:"procession"});return renderProcessionV5()}
               if(action==="to-door-v5"){await saveArchive({directorStage:"door"});return renderDoorV5()}
               if(["door-silent","door-question","door-heart"].includes(action)){
-                if(state.loading)return;state.loading=true;el.disabled=true;
+                if(state.loading)return;
+                state.loading=true;
+                const loadingText=action==="door-heart"?"他正在认真回答":action==="door-question"?"他正在隔门回应":"门外安静了一会儿";
+                const doneLoading=beginGenerating(el,loadingText);
                 const q=action==="door-heart"?"门里的人让你拿出诚意，问：今日你为什么来娶她？请直接以新郎本人回答。":
                   action==="door-question"?"隔着门，USER问你：你现在紧张吗？请以你本人真实口吻回答。":
                   "门里没有回应。你站在门外等了一会儿。请以你本人会有的方式再说一句，让她知道你会等她开门。";
-                try{const t=await weddingAwareText(q,160);await saveArchive({doorAnswer:t,directorStage:"door"})}catch(_){toast("生成失败")}
-                state.loading=false;return renderDoorV5();
+                try{
+                  const t=await weddingAwareText(q,160);
+                  await saveArchive({doorAnswer:t,directorStage:"door"});
+                }catch(_){toast("生成失败")}
+                finally{state.loading=false;doneLoading()}
+                return renderDoorV5();
+              }
+              if(action==="door-open-v5"){
+                await saveArchive({directorStage:"fan"});
+                return renderFanV5(0);
               }
               if(action==="fan-touch"){
                 const p=Number(el.dataset.peek||1);
                 if(p>=2 && !state.archive?.firstLook && !state.loading){
                   state.loading=true;
-                  try{const t=await weddingAwareText("却扇后，你第一次完整看见穿着婚服的 USER。只写你本人此刻的一句反应或一个短动作，不要旁白，不要模板情话。",120);await saveArchive({firstLook:t,directorStage:"fan"})}catch(_){}
-                  state.loading=false;
+                  const doneLoading=beginGenerating(el,"他正在看向你");
+                  try{
+                    const t=await weddingAwareText("却扇后，你第一次完整看见穿着婚服的 USER。只写你本人此刻的一句反应或一个短动作，不要旁白，不要模板情话。",120);
+                    await saveArchive({firstLook:t,directorStage:"fan"});
+                  }catch(_){toast("他的反应生成失败")}
+                  finally{state.loading=false;doneLoading()}
                 }
                 return renderFanV5(p);
               }
@@ -1942,26 +2011,42 @@
               }
               if(action==="tie-hair-v5"){try{navigator.vibrate?.(24)}catch(_){};await saveArchive({hairKeepsake:true,directorStage:"vows"});toast("结发锦囊已收入婚藏");setTimeout(renderVowsV5,700);return}
               if(action==="draft-user-vow"){
-                if(state.loading)return;state.loading=true;el.disabled=true;el.textContent="代拟中……";
-                try{const t=await weddingAwareText("请站在 USER 的视角，依据 USER 人设与双方关系，草拟一段不超过180字的婚誓。不要替 USER 编造重大经历，不要套用古风模板，必须可以被她继续编辑。",180);view.querySelector("#hj-vow-user-v5").value=t}catch(_){toast("生成失败")}
-                state.loading=false;el.disabled=false;el.textContent="依我的人设拟一份";return;
+                if(state.loading)return;
+                state.loading=true;
+                const doneLoading=beginGenerating(el,"正在为你拟誓");
+                try{
+                  const t=await weddingAwareText("请站在 USER 的视角，依据 USER 人设与双方关系，草拟一段不超过180字的婚誓。不要替 USER 编造重大经历，不要套用古风模板，必须可以被她继续编辑。",180);
+                  const box=view.querySelector("#hj-vow-user-v5");
+                  if(box) box.value=t;
+                }catch(_){toast("生成失败")}
+                finally{state.loading=false;doneLoading()}
+                return;
               }
               if(action==="save-vows-v5"){const v=view.querySelector("#hj-vow-user-v5").value.trim();if(!v)return toast("先写下你的婚誓");await saveArchive({vowUser:v,directorStage:"book",marriageNo:state.archive?.marriageNo||("HJ-"+Date.now().toString(36).toUpperCase())});return renderBookV5("user")}
               if(action==="partner-seal"){try{navigator.vibrate?.(45)}catch(_){};await saveArchive({partnerSealAt:Date.now(),directorStage:"book"});return renderBookV5("done")}
               if(action==="ceremony-complete-v5"){await saveArchive({directorStage:"complete",status:"ceremony-complete"});return renderCeremonyCompleteV5()}
               if(action==="to-banquet-v5"){await saveArchive({directorStage:"banquet"});return renderBanquetV5()}
               if(action==="banquet-talk-v5"||action==="banquet-toast-v5"){
-                if(state.loading)return;state.loading=true;
+                if(state.loading)return;
+                state.loading=true;
+                const doneLoading=beginGenerating(el,action==="banquet-toast-v5"?"他正与你举杯":"他发现你在看他");
                 const task=action==="banquet-toast-v5"?"喜宴上，你和新婚妻子一起举杯。以你本人原本的性格，对她说一句轻松但真诚的话。":"喜宴正热闹，你发现 USER 在偷看你。以你本人会有的方式回应她。";
-                try{const t=await weddingAwareText(task,120);await saveArchive({banquetLine:t})}catch(_){}
-                state.loading=false;return renderBanquetV5();
+                try{
+                  const t=await weddingAwareText(task,120);
+                  await saveArchive({banquetLine:t});
+                }catch(_){toast("生成失败")}
+                finally{state.loading=false;doneLoading()}
+                return renderBanquetV5();
               }
               if(action==="to-night-v5"){await saveArchive({directorStage:"night"});return renderNightV5()}
               if(action==="night-question"||action==="night-look"){
-                if(state.loading)return;state.loading=true;
+                if(state.loading)return;
+                state.loading=true;
+                const doneLoading=beginGenerating(el,"他正在想怎么回答");
                 const task=action==="night-question"?"婚礼结束后只剩你们两个人。USER问：你今天什么时候最紧张？请真实回答。":"婚礼结束后只剩你们两个人。USER问：你今天第一次完整看到我穿婚服时，在想什么？请真实回答。";
                 try{const t=await weddingAwareText(task,180);toast(t)}catch(_){toast("他想了一会儿")}
-                state.loading=false;return;
+                finally{state.loading=false;doneLoading()}
+                return;
               }
               if(action==="sleep-v5"){await saveArchive({directorStage:"morning"});return renderMorningV5()}
               if(action==="finish-wedding-v5"){await saveArchive({completedAt:state.archive?.completedAt||Date.now(),status:"married",directorStage:"married"});return renderAnniversaryV5()}
