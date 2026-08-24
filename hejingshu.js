@@ -3,13 +3,57 @@
 
   const PLUGIN_ID = "hejingshu";
   const APP_ID = "hejingshu-home";
-  const VERSION = "0.3.1";
+  const VERSION = "0.4.0";
 
   const GOLD = "#D6B56A";
   const DEEP_RED = "#6F0D14";
   const PAPER_RED = "#8E111A";
   const DARK_RED = "#4C090D";
   const SOFT_GOLD = "#E8D49A";
+
+  const ASSET_BASE = "https://raw.githubusercontent.com/linyin8945/hejingshu/main/assets/scenes/";
+  const WEDDING_ASSETS = {
+    procession: ASSET_BASE + "procession.webp",
+    weddingGate: ASSET_BASE + "wedding-gate.webp",
+    bridePrep: ASSET_BASE + "bride-prep.webp",
+    hejinCups: ASSET_BASE + "hejin-cups.webp",
+    ceremonyComplete: ASSET_BASE + "ceremony-complete.webp",
+    bridalRoom: ASSET_BASE + "bridal-room-main.webp",
+    bridalRoomAlt: ASSET_BASE + "bridal-room-alt.webp",
+    officiantScroll: ASSET_BASE + "officiant-scroll.webp",
+    weddingHallEntry: ASSET_BASE + "wedding-hall-entry.webp",
+    sedanJourney: ASSET_BASE + "sedan-journey.webp",
+    sedanArrival: ASSET_BASE + "sedan-arrival.webp",
+    doubleSeal: ASSET_BASE + "double-seal.webp",
+    pickupDoor: ASSET_BASE + "pickup-door.webp",
+    banquetToast: ASSET_BASE + "banquet-toast.webp",
+    banquetHall: ASSET_BASE + "banquet-hall.webp",
+    vowsScroll: ASSET_BASE + "vows-scroll.webp",
+    bridalNightSeated: ASSET_BASE + "bridal-night-seated.webp",
+    hairKnot: ASSET_BASE + "hair-knot.webp",
+    bowCeremony: ASSET_BASE + "bow-ceremony.webp",
+    marriageBook: ASSET_BASE + "marriage-book.webp",
+    veilLift: ASSET_BASE + "veil-lift.webp",
+    departureHands: ASSET_BASE + "departure-hands.webp",
+    morningAfter: ASSET_BASE + "morning-after.webp",
+    keepsakes: ASSET_BASE + "keepsakes.webp"
+  };
+
+  function sceneStyle(key, position = "center") {
+    const url = WEDDING_ASSETS[key];
+    if (!url) return "";
+    return `style="--hj-scene-image:url('${url}');--hj-scene-pos:${position}"`;
+  }
+
+  function preloadAssets(keys) {
+    (keys || []).forEach(key => {
+      const url = WEDDING_ASSETS[key];
+      if (!url) return;
+      const img = new Image();
+      img.decoding = "async";
+      img.src = url;
+    });
+  }
 
   function esc(v) {
     return String(v ?? "").replace(/[&<>"']/g, s => ({
@@ -349,6 +393,148 @@
   padding-bottom:20px !important;
 }
 
+
+/* v0.4 · 正式婚礼素材场景 */
+.hj-scene.hj-photo-scene{
+  background:#3e0508;
+  isolation:isolate;
+}
+.hj-photo-scene::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background-image:var(--hj-scene-image);
+  background-size:cover;
+  background-position:var(--hj-scene-pos, center);
+  background-repeat:no-repeat;
+  transform:scale(1.015);
+  animation:hjPhotoBreath 10s ease-in-out infinite alternate;
+  z-index:-3;
+}
+.hj-photo-scene::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(180deg,rgba(25,1,3,.30) 0%,rgba(25,1,3,.08) 30%,rgba(25,1,3,.16) 58%,rgba(25,1,3,.82) 100%),
+    linear-gradient(90deg,rgba(35,2,4,.18),transparent 28%,transparent 72%,rgba(35,2,4,.18));
+  z-index:-2;
+  pointer-events:none;
+}
+.hj-photo-scene .hj-topbar{
+  background:linear-gradient(180deg,rgba(32,2,4,.58),transparent);
+}
+.hj-photo-scene .hj-scene-main{
+  align-items:flex-end;
+  padding-bottom:132px;
+}
+.hj-photo-scene .hj-scene-card{
+  padding:20px 18px;
+  border:1px solid rgba(238,211,144,.28);
+  border-radius:18px;
+  background:linear-gradient(180deg,rgba(55,5,8,.38),rgba(44,4,7,.68));
+  box-shadow:0 16px 44px rgba(0,0,0,.22);
+  backdrop-filter:blur(9px);
+  -webkit-backdrop-filter:blur(9px);
+}
+.hj-photo-scene .hj-scene-title{
+  text-shadow:0 2px 18px rgba(0,0,0,.42);
+}
+.hj-photo-scene .hj-scene-copy{
+  color:#f2e3bf;
+  text-shadow:0 1px 10px rgba(0,0,0,.38);
+}
+.hj-scene-bottom{
+  padding-bottom:calc(20px + env(safe-area-inset-bottom));
+}
+.hj-scene-bottom .hj-primary,
+.hj-scene-bottom .hj-secondary{
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+.hj-scene-caption{
+  margin:0 auto 12px;
+  max-width:330px;
+  color:#f1ddb0;
+  font-size:12px;
+  line-height:1.9;
+  text-align:center;
+}
+.hj-photo-hero{
+  position:relative;
+  width:100%;
+  aspect-ratio:16/10;
+  overflow:hidden;
+  border-radius:18px;
+  border:1px solid rgba(224,192,112,.32);
+  box-shadow:0 18px 44px rgba(0,0,0,.18);
+  margin-bottom:16px;
+}
+.hj-photo-hero img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+}
+.hj-photo-hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,transparent 58%,rgba(43,3,6,.52));
+  pointer-events:none;
+}
+.hj-photo-label{
+  position:absolute;
+  left:14px;
+  bottom:12px;
+  z-index:2;
+  color:#f2d995;
+  font-size:12px;
+  letter-spacing:.18em;
+  text-shadow:0 2px 10px rgba(0,0,0,.55);
+}
+.hj-stage-word{
+  display:inline-block;
+  padding:5px 10px;
+  border:1px solid rgba(234,204,126,.35);
+  border-radius:999px;
+  color:#e9cf91;
+  background:rgba(58,5,8,.42);
+  font-size:10px;
+  letter-spacing:.2em;
+  margin-bottom:10px;
+}
+.hj-vows-bg{
+  position:relative;
+  overflow:hidden;
+}
+.hj-vows-bg::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:url("https://raw.githubusercontent.com/linyin8945/hejingshu/main/assets/scenes/vows-scroll.webp") center/cover no-repeat;
+  opacity:.24;
+  filter:saturate(.9);
+  pointer-events:none;
+}
+.hj-vows-bg > *{position:relative}
+.hj-keepsake-card{
+  position:relative;
+  overflow:hidden;
+  min-height:190px;
+  border-radius:18px;
+  border:1px solid rgba(222,187,101,.3);
+  background:#5b090e;
+  margin-top:16px;
+}
+.hj-keepsake-card img{width:100%;height:190px;object-fit:cover;display:block}
+.hj-keepsake-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 52%,rgba(46,3,6,.76))}
+.hj-keepsake-title{position:absolute;left:16px;bottom:14px;z-index:2;color:#f2d994;font-size:15px;letter-spacing:.12em}
+@keyframes hjPhotoBreath{
+  from{transform:scale(1.015)}
+  to{transform:scale(1.055)}
+}
+
 </style>`;
   }
 
@@ -647,6 +833,10 @@
             <div class="hj-page">
               <div class="hj-section-title">二 · 婚期将至</div>
               <div class="hj-section-desc">真正的大婚，从“明日要成婚”开始。</div>
+              <div class="hj-photo-hero">
+                <img src="${WEDDING_ASSETS.bridePrep}" alt="">
+                <div class="hj-photo-label">凤冠初成 · 吉时将近</div>
+              </div>
               <div class="hj-card">
                 <div class="hj-scene-kicker">婚 前 心 绪</div>
                 <div class="hj-section-title" style="font-size:18px">迎亲之前</div>
@@ -671,7 +861,7 @@
           const a = state.archive || {};
           if(stage==="叩门"){
             view.innerHTML = `
-              <div class="hj-scene">
+              <div class="hj-scene hj-photo-scene" ${sceneStyle("pickupDoor","center")}>
                 ${topbar("亲迎 · 叩门","prewedding")}
                 <div class="hj-scene-main"><div class="hj-scene-card">
                   <div class="hj-scene-kicker">吉 时 已 至</div>
@@ -689,7 +879,7 @@
           } else if(stage==="寻鞋"){
             const found = a.shoeFound;
             view.innerHTML = `
-              <div class="hj-scene">
+              <div class="hj-scene hj-photo-scene" ${sceneStyle("bridalRoom","center")}>
                 ${topbar("亲迎 · 寻鞋","prewedding")}
                 <div class="hj-scene-main"><div class="hj-scene-card">
                   <div class="hj-scene-kicker">堵 门 小 戏</div>
@@ -710,7 +900,7 @@
 
         function renderExitBride() {
           view.innerHTML = `
-            <div class="hj-scene">
+            <div class="hj-scene hj-photo-scene" ${sceneStyle("departureHands","center")}>
               ${topbar("出阁礼","却扇")}
               <div class="hj-scene-main"><div class="hj-scene-card">
                 <div class="hj-scene-kicker">辞 旧 迎 新</div>
@@ -726,7 +916,7 @@
         function renderHall() {
           const a = state.archive || {};
           view.innerHTML = `
-            <div class="hj-scene">
+            <div class="hj-scene hj-photo-scene" ${sceneStyle("weddingHallEntry","center")}>
               ${topbar("华堂","出阁")}
               <div class="hj-curtain"></div>
               <div class="hj-lantern-wrap"><div class="hj-lantern"></div><div class="hj-lantern" style="animation-delay:.7s"></div></div>
@@ -750,16 +940,17 @@
             "合卺":["合卺","卺分为二 · 合而为一","两盏相合，从此同甘共苦。"],
             "结发":["结发","两缕同心","结发为盟，不在发丝，而在此后愿意同行。"]
           }[stage] || ["正礼","嘉礼",""];
+          const formalAsset = stage==="拜礼" ? "bowCeremony" : stage==="合卺" ? "hejinCups" : stage==="结发" ? "hairKnot" : "officiantScroll";
           view.innerHTML = `
-            <div class="hj-scene">
+            <div class="hj-scene hj-photo-scene" ${sceneStyle(formalAsset,"center")}>
               ${topbar("正礼 · "+stage,"hall")}
               <div class="hj-scene-main"><div class="hj-scene-card">
                 <div class="hj-scene-kicker">赞 礼 官</div>
                 <div class="hj-scene-title">${copy[0]}</div>
                 <div class="hj-scene-copy">${copy[2]}</div>
-                ${stage==="合卺" ? `<div class="hj-cups" id="hj-cups"><div class="hj-cup left"></div><div class="hj-cup right"></div><div class="hj-flash"></div></div><button class="hj-secondary" data-action="join-cups">共饮合卺</button>` :
-                  stage==="结发" ? `<div class="hj-thread-stage" id="hj-thread-stage"><div class="hj-thread left"></div><div class="hj-thread right"></div><div class="hj-thread-knot">∞</div></div><button class="hj-secondary" data-action="tie-thread">结发</button>` :
-                  `<div class="hj-knot" style="margin-top:20px">${stage==="沃盥"?"水":"礼"}</div>`}
+                ${stage==="合卺" ? `<div id="hj-cups" class="hj-scene-caption">卺分为二，合而为一。执盏，与他共饮。</div><button class="hj-secondary" data-action="join-cups">与他共饮</button>` :
+                  stage==="结发" ? `<div id="hj-thread-stage" class="hj-scene-caption">各取一缕青丝，以红线同系，收作今日之信。</div><button class="hj-secondary" data-action="tie-thread">同系青丝</button>` :
+                  `<div class="hj-stage-word">${stage==="沃盥"?"净手洁心":"天地为证"}</div>`}
               </div></div>
               <div class="hj-scene-bottom"><button class="hj-primary" data-action="formal-next" data-next="${stage==="沃盥"?"拜礼":stage==="拜礼"?"合卺":stage==="合卺"?"结发":"婚誓"}">${stage==="结发"?"各陈一诺":"礼成 · 下一仪"}</button></div>
             </div>`;
@@ -768,18 +959,18 @@
 
         function renderBanquet() {
           view.innerHTML = `
-            <div class="hj-scene">
+            <div class="hj-scene hj-photo-scene" ${sceneStyle("banquetHall","center")}>
               ${topbar("喜宴","certificate")}
               <div class="hj-lantern-wrap"><div class="hj-lantern"></div><div class="hj-lantern" style="animation-delay:.6s"></div></div>
               <div class="hj-scene-main"><div class="hj-scene-card">
                 <div class="hj-scene-kicker">嘉 礼 已 成 · 宾 朋 共 贺</div>
                 <div class="hj-scene-title">开席</div>
                 <div class="hj-scene-copy">正礼结束以后，才该热闹起来。敬酒、喜糖、合影、宾客留言，都属于这一日。</div>
-                <div class="hj-grid">
-                  <div class="hj-card">敬酒</div><div class="hj-card">喜糖</div>
-                  <div class="hj-card">合影</div><div class="hj-card">留言簿</div>
+                <div class="hj-photo-hero" style="aspect-ratio:16/8.6;margin-top:8px">
+                  <img src="${WEDDING_ASSETS.banquetToast}" alt="">
+                  <div class="hj-photo-label">满堂贺喜 · 同席共饮</div>
                 </div>
-                <div id="hj-banquet-line" class="hj-toastline" style="margin-top:18px"></div>
+                <div id="hj-banquet-line" class="hj-toastline" style="margin-top:8px"></div>
                 <button class="hj-secondary" data-action="banquet-moment">让他在喜宴里说一句</button>
               </div></div>
               <div class="hj-scene-bottom"><button class="hj-primary" data-action="finish-day">宴散 · 嘉礼已毕</button></div>
@@ -791,7 +982,7 @@
           const a = state.archive || {};
           if (kind === "迎亲") {
             view.innerHTML = `
-              <div class="hj-scene">
+              <div class="hj-scene hj-photo-scene" ${sceneStyle("procession","center")}>
                 ${topbar("迎亲","rituals")}
                 <div class="hj-curtain"></div>
                 <div class="hj-lantern-wrap"><div class="hj-lantern"></div><div class="hj-lantern" style="animation-delay:.8s"></div></div>
@@ -805,7 +996,7 @@
           } else if (kind === "却扇") {
             const c = state.selectedChar;
             view.innerHTML = `
-              <div class="hj-scene">
+              <div class="hj-scene hj-photo-scene" ${sceneStyle("veilLift","center")}>
                 ${topbar("却扇","rituals")}
                 <div class="hj-scene-main"><div class="hj-scene-card">
                   <div class="hj-scene-kicker">却 扇 相 见</div>
@@ -857,7 +1048,7 @@
           const a = state.archive || {};
           view.innerHTML = `
             ${topbar("共书婚誓","rituals")}
-            <div class="hj-page">
+            <div class="hj-page hj-vows-bg">
               <div class="hj-stepper"><i class="hj-dot on"></i><i class="hj-dot on"></i><i class="hj-dot on"></i><i class="hj-dot on"></i><i class="hj-dot"></i></div>
               <div class="hj-section-title">四 · 共书婚誓</div>
               <div class="hj-section-desc">此处不求华丽，只留真正愿意带到以后的一句话。</div>
@@ -882,6 +1073,10 @@
             ${topbar("婚书","vows")}
             <div class="hj-page">
               <div class="hj-stepper"><i class="hj-dot on"></i><i class="hj-dot on"></i><i class="hj-dot on"></i><i class="hj-dot on"></i><i class="hj-dot on"></i></div>
+              <div class="hj-photo-hero" style="aspect-ratio:16/9.4">
+                <img src="${WEDDING_ASSETS.marriageBook}" alt="">
+                <div class="hj-photo-label">两姓缔约 · 此诺为凭</div>
+              </div>
               <div class="hj-certificate hj-cert-reveal">
                 <div class="hj-cert-top">嘉 礼 初 成 · 两 姓 婚 盟</div>
                 <div class="hj-cert-title">婚书</div>
@@ -916,6 +1111,38 @@
           if (!completed) bindLongPress();
         }
 
+
+        function renderCeremonyComplete() {
+          preloadAssets(["banquetHall","banquetToast"]);
+          view.innerHTML = `
+            <div class="hj-scene hj-photo-scene" ${sceneStyle("ceremonyComplete","center")}>
+              ${topbar("礼成","certificate")}
+              <div class="hj-scene-main"><div class="hj-scene-card">
+                <div class="hj-scene-kicker">赞 礼</div>
+                <div class="hj-scene-title">礼成</div>
+                <div class="hj-scene-copy">两姓既合，婚书既成。今日诸礼至此圆满，而往后的日子，才刚刚开始。</div>
+                <div class="hj-scene-caption">从今往后，同往人间。</div>
+              </div></div>
+              <div class="hj-scene-bottom"><button class="hj-primary" data-action="to-banquet">赴喜宴</button></div>
+            </div>`;
+          bind();
+        }
+
+        function renderMorningAfter() {
+          preloadAssets(["keepsakes"]);
+          view.innerHTML = `
+            <div class="hj-scene hj-photo-scene" ${sceneStyle("morningAfter","center")}>
+              ${topbar("新婚第一日","home")}
+              <div class="hj-scene-main"><div class="hj-scene-card">
+                <div class="hj-scene-kicker">花 烛 余 温</div>
+                <div class="hj-scene-title">新婚第一日</div>
+                <div class="hj-scene-copy">昨夜灯火已静，婚书、凤冠与合卺杯仍留在案上。礼已毕，而余生方始。</div>
+              </div></div>
+              <div class="hj-scene-bottom"><button class="hj-primary" data-action="enter-anniversary">入岁岁帖</button></div>
+            </div>`;
+          bind();
+        }
+
         function renderAnniversary() {
           const a = state.archive || {};
           const d = daysSince(a.completedAt);
@@ -933,6 +1160,10 @@
                   <span>${esc(a.userMarriageName || userName())}</span><span>·</span><span>${esc(a.partnerMarriageName || partnerName())}</span>
                 </div>
                 <div style="text-align:center;color:#BFAE90;font-size:11px;margin-top:8px">${esc(a.weddingDate || "")}</div>
+              </div>
+              <div class="hj-keepsake-card">
+                <img src="${WEDDING_ASSETS.keepsakes}" alt="">
+                <div class="hj-keepsake-title">婚礼珍藏 · 留作岁岁之证</div>
               </div>
               <div class="hj-card" style="margin-top:14px">
                 <div class="hj-section-title" style="font-size:17px;margin-top:0">岁岁帖</div>
@@ -1008,7 +1239,7 @@
               await saveArchive({status:"ceremony-complete"});
               try { navigator.vibrate?.(45); } catch(_){}
               toast("嘉礼成 · 此书既成，岁岁为证");
-              setTimeout(renderBanquet, 650);
+              setTimeout(renderCeremonyComplete, 650);
             },1200);
           };
           el.addEventListener("pointerdown", begin);
@@ -1045,8 +1276,12 @@
               }
               if (action === "start") return renderChoose();
               if (action === "select-char") {
+                const scroller = view.querySelector(".hj-page");
+                const y = scroller?.scrollTop || 0;
                 state.selectedChar = state.chars.find(c=>c.id===el.dataset.id) || null;
-                return renderChoose();
+                renderChoose();
+                requestAnimationFrame(()=>{ const s=view.querySelector(".hj-page"); if(s) s.scrollTop=y; });
+                return;
               }
               if (action === "to-names") {
                 if (!state.selectedChar) return toast("请先择一良人");
@@ -1138,10 +1373,12 @@
                 } catch(_) { toast("生成失败"); }
                 state.loading = false; el.disabled = false; el.textContent = "让他在喜宴里说一句";
               }
+              if (action === "to-banquet") return renderBanquet();
+              if (action === "enter-anniversary") return renderAnniversary();
               if (action === "finish-day") {
                 await saveArchive({completedAt:Date.now(),status:"married"});
                 toast("嘉礼已毕 · 而余生方始");
-                setTimeout(renderAnniversary,700);
+                setTimeout(renderMorningAfter,700);
               }
               if (action === "generate-blessing") {
                 if (state.loading) return;
@@ -1213,7 +1450,7 @@
                 if (!ok) return;
                 await saveArchive({status:"ceremony-complete"});
                 toast("嘉礼成");
-                setTimeout(renderBanquet, 500);
+                setTimeout(renderCeremonyComplete, 500);
               }
               if (action === "certificate") return renderCertificate(false);
               if (action === "save-note") {
@@ -1226,6 +1463,7 @@
         }
 
         await loadBase();
+        preloadAssets(["bridePrep","pickupDoor","procession","weddingHallEntry","bowCeremony"]);
         renderHome();
 
         root.__hjCleanup = () => {
