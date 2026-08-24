@@ -3,7 +3,7 @@
 
   const PLUGIN_ID = "hejingshu";
   const APP_ID = "hejingshu-home";
-  const VERSION = "0.1.0";
+  const VERSION = "0.2.0";
 
   const GOLD = "#D6B56A";
   const DEEP_RED = "#6F0D14";
@@ -126,6 +126,75 @@
 @keyframes hjRule{to{width:78%}}
 @keyframes hjSeal{0%{opacity:0;transform:scale(1.6) rotate(-12deg)}65%{opacity:1;transform:scale(.92) rotate(2deg)}100%{transform:scale(1)}}
 @media (max-width:380px){.hj-title{font-size:36px}.hj-grid{grid-template-columns:1fr}.hj-page{padding-left:16px;padding-right:16px}}
+
+.hj-opening-scroll{position:relative;width:min(86vw,390px);min-height:520px;margin:auto;padding:58px 28px 46px;
+  background:linear-gradient(180deg,rgba(154,25,31,.96),rgba(111,13,20,.98));
+  border-left:8px solid #3b0508;border-right:8px solid #3b0508;
+  box-shadow:0 22px 55px rgba(0,0,0,.28),inset 0 0 0 1px rgba(231,202,126,.18);
+  overflow:hidden;transform-origin:center top;animation:hjScrollOpen 1.35s cubic-bezier(.2,.8,.2,1) both}
+.hj-opening-scroll:before,.hj-opening-scroll:after{content:"";position:absolute;left:10px;right:10px;height:18px;
+  background:linear-gradient(180deg,#2b0305,#6f0d14 45%,#2b0305);border:1px solid rgba(214,181,106,.35)}
+.hj-opening-scroll:before{top:12px}.hj-opening-scroll:after{bottom:12px}
+.hj-cloud{position:absolute;color:rgba(230,199,120,.15);font-size:58px;line-height:1;pointer-events:none}
+.hj-cloud.c1{left:-6px;top:74px;transform:rotate(-8deg)}.hj-cloud.c2{right:-2px;bottom:90px;transform:rotate(9deg)}
+.hj-gold-dust{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.hj-gold-dust i{position:absolute;width:3px;height:3px;border-radius:50%;background:#e5c671;opacity:.45;animation:hjDust 5s linear infinite}
+.hj-scene{min-height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.hj-scene-main{flex:1;display:flex;align-items:center;justify-content:center;padding:28px 20px 120px}
+.hj-scene-card{width:min(92vw,480px);text-align:center;position:relative}
+.hj-scene-kicker{font-size:11px;letter-spacing:.34em;color:#cdb98d;margin-bottom:10px}
+.hj-scene-title{font-size:28px;letter-spacing:.2em;color:#efd488;margin-right:-.2em}
+.hj-scene-copy{font-size:12px;line-height:1.9;color:#d6c39d;margin:12px auto 22px;max-width:310px}
+.hj-lantern-wrap{display:flex;justify-content:space-between;position:absolute;top:30px;left:18px;right:18px;pointer-events:none}
+.hj-lantern{width:46px;height:66px;border:1px solid rgba(226,197,122,.55);border-radius:46% 46% 40% 40%;background:rgba(151,20,27,.65);
+  box-shadow:0 0 24px rgba(226,197,122,.08);position:relative;transform-origin:50% -10px;animation:hjSwing 3.6s ease-in-out infinite}
+.hj-lantern:before{content:"";position:absolute;left:11px;right:11px;top:8px;bottom:8px;border:1px solid rgba(226,197,122,.22);border-radius:48%}
+.hj-lantern:after{content:"";position:absolute;left:50%;bottom:-18px;width:1px;height:18px;background:#c89f53}
+.hj-curtain{position:absolute;inset:0;pointer-events:none;background:
+  linear-gradient(90deg,rgba(47,4,7,.9),transparent 16%,transparent 84%,rgba(47,4,7,.9)),
+  repeating-linear-gradient(90deg,transparent 0 34px,rgba(230,199,120,.025) 34px 35px)}
+.hj-fan-stage{position:relative;width:250px;height:250px;margin:8px auto 18px}
+.hj-face{position:absolute;inset:35px;border-radius:50%;overflow:hidden;border:1px solid rgba(230,199,120,.45);background:#5a0b10;box-shadow:0 12px 35px rgba(0,0,0,.2)}
+.hj-face img{width:100%;height:100%;object-fit:cover}
+.hj-face .hj-avatar-fallback{width:100%;height:100%;border-radius:50%;font-size:48px}
+.hj-fan{position:absolute;width:220px;height:220px;left:15px;top:16px;border-radius:50% 50% 46% 46%;
+  background:
+    radial-gradient(circle at 50% 44%,rgba(255,244,214,.94) 0 52%,rgba(232,219,184,.95) 53% 55%,rgba(255,247,226,.96) 56%),
+    #efe1bc;
+  border:2px solid #c6a85d;box-shadow:0 18px 34px rgba(0,0,0,.24);transition:transform 1s cubic-bezier(.2,.8,.2,1),opacity .8s ease;transform-origin:72% 82%}
+.hj-fan:before{content:"却";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#9b6e36;font-size:42px;opacity:.62}
+.hj-fan:after{content:"";position:absolute;width:8px;height:84px;background:linear-gradient(#b79049,#72511f);left:108px;bottom:-72px;border-radius:10px}
+.hj-fan.open{transform:translate(82px,-28px) rotate(26deg);opacity:.93}
+.hj-toastline{min-height:28px;font-size:13px;color:#efd89a;line-height:1.8;margin-top:4px}
+.hj-cups{position:relative;width:280px;height:180px;margin:10px auto 20px}
+.hj-cup{position:absolute;bottom:28px;width:94px;height:64px;border:2px solid #d6b56a;border-top:none;border-radius:0 0 46px 46px;
+  background:linear-gradient(180deg,rgba(219,184,96,.06),rgba(219,184,96,.14));transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
+.hj-cup:before{content:"";position:absolute;left:8px;right:8px;top:-6px;height:12px;border:2px solid #d6b56a;border-radius:50%;background:#6c0d13}
+.hj-cup.left{left:22px;transform:rotate(-8deg)}.hj-cup.right{right:22px;transform:rotate(8deg)}
+.hj-cups.join .hj-cup.left{transform:translateX(48px) rotate(6deg)}.hj-cups.join .hj-cup.right{transform:translateX(-48px) rotate(-6deg)}
+.hj-flash{position:absolute;left:50%;top:74px;width:10px;height:10px;border-radius:50%;transform:translate(-50%,-50%) scale(.2);
+  background:#f6dda0;box-shadow:0 0 0 0 rgba(246,221,160,.4);opacity:0}
+.hj-cups.join .hj-flash{animation:hjFlash .8s .72s ease both}
+.hj-thread-stage{position:relative;height:190px;margin:8px auto 20px;max-width:320px}
+.hj-thread{position:absolute;top:88px;width:48%;height:3px;background:linear-gradient(90deg,transparent,#d4b05d 18%,#d4b05d 82%,transparent);transition:transform 1.1s cubic-bezier(.2,.8,.2,1)}
+.hj-thread.left{left:0;transform-origin:right center;transform:rotate(12deg)}.hj-thread.right{right:0;transform-origin:left center;transform:rotate(-12deg)}
+.hj-thread-stage.tied .hj-thread.left{transform:translateX(58px) rotate(28deg)}.hj-thread-stage.tied .hj-thread.right{transform:translateX(-58px) rotate(-28deg)}
+.hj-thread-knot{position:absolute;left:50%;top:65px;transform:translateX(-50%) scale(.6);opacity:.2;font-size:42px;color:#dfc06e;transition:.8s .5s}
+.hj-thread-stage.tied .hj-thread-knot{transform:translateX(-50%) scale(1);opacity:1}
+.hj-longpress{position:relative;width:116px;height:116px;border-radius:50%;margin:16px auto 10px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;-webkit-user-select:none}
+.hj-longpress-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(#e2c16f var(--hold,0%),rgba(226,193,111,.14) 0);mask:radial-gradient(circle,transparent 56%,#000 57%);-webkit-mask:radial-gradient(circle,transparent 56%,#000 57%)}
+.hj-longpress-seal{width:82px;height:82px;border:2px solid #d76f62;color:#d76f62;display:flex;align-items:center;justify-content:center;line-height:1.05;font-size:22px;transform:rotate(-5deg);background:rgba(86,9,13,.75);transition:.18s}
+.hj-longpress.holding .hj-longpress-seal{transform:rotate(-5deg) scale(.94) translateY(3px)}
+.hj-cert-reveal .hj-cert-top,.hj-cert-reveal .hj-cert-title,.hj-cert-reveal .hj-cert-names,.hj-cert-reveal .hj-cert-text,.hj-cert-reveal .hj-cert-vows,.hj-cert-reveal .hj-seal,.hj-cert-reveal .hj-cert-foot{opacity:0;transform:translateY(8px);animation:hjCertIn .7s ease forwards}
+.hj-cert-reveal .hj-cert-title{animation-delay:.15s}.hj-cert-reveal .hj-cert-names{animation-delay:.3s}.hj-cert-reveal .hj-cert-text{animation-delay:.45s}.hj-cert-reveal .hj-cert-vows{animation-delay:.62s}.hj-cert-reveal .hj-seal{animation-delay:.8s}.hj-cert-reveal .hj-cert-foot{animation-delay:.95s}
+.hj-scene-bottom{position:absolute;left:0;right:0;bottom:0;padding:14px 18px 22px;background:linear-gradient(180deg,transparent,rgba(51,4,7,.96) 34%);z-index:4}
+.hj-scene-bottom button{width:100%}
+@keyframes hjScrollOpen{0%{opacity:0;transform:scaleY(.08) translateY(-30px)}55%{opacity:1}100%{transform:scaleY(1) translateY(0)}}
+@keyframes hjDust{0%{transform:translateY(-20px);opacity:0}15%{opacity:.5}100%{transform:translateY(520px);opacity:0}}
+@keyframes hjSwing{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+@keyframes hjFlash{0%{opacity:0;transform:translate(-50%,-50%) scale(.2);box-shadow:0 0 0 0 rgba(246,221,160,.5)}40%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(5);box-shadow:0 0 24px 18px rgba(246,221,160,0)}}
+@keyframes hjCertIn{to{opacity:1;transform:none}}
+
 </style>`;
   }
 
@@ -203,15 +272,20 @@
             renderAnniversary();
             return;
           }
+          const dust = Array.from({length:18},(_,i)=>`<i style="left:${(i*37)%100}%;top:${-(i*23)%120}px;animation-delay:${(i%7)*.42}s"></i>`).join("");
           view.innerHTML = `
             <div class="hj-home">
-              <div class="hj-opening">
-                <div class="hj-knot">囍</div>
-                <div class="hj-title">合卺书</div>
-                <div class="hj-sub">嘉礼初成 · 两姓婚盟</div>
-                <div class="hj-rule"></div>
-                <div class="hj-quote">谨以白头之约，书向鸿笺。<br>好将红叶之盟，载明鸳谱。</div>
-                <button class="hj-primary" data-action="start">启书</button>
+              <div class="hj-opening-scroll">
+                <div class="hj-gold-dust">${dust}</div>
+                <div class="hj-cloud c1">☁</div><div class="hj-cloud c2">☁</div>
+                <div class="hj-opening">
+                  <div class="hj-knot">囍</div>
+                  <div class="hj-title">合卺书</div>
+                  <div class="hj-sub">嘉礼初成 · 两姓婚盟</div>
+                  <div class="hj-rule"></div>
+                  <div class="hj-quote">谨以白头之约，书向鸿笺。<br>好将红叶之盟，载明鸳谱。</div>
+                  <button class="hj-primary" data-action="start">启书</button>
+                </div>
               </div>
             </div>`;
           bind();
@@ -288,7 +362,7 @@
               </div>
               <div class="hj-actions">
                 <button class="hj-secondary" data-action="generate-blessing">生成婚缘辞</button>
-                <button class="hj-primary" data-action="to-vows">共书婚誓</button>
+                <button class="hj-primary" data-action="scene-next" data-next="迎亲">进入婚礼渲染</button>
               </div>
               ${a.blessing ? `<div class="hj-card" style="margin-top:14px;font-size:12px;line-height:1.9;color:#E7D4A8">${esc(a.blessing)}</div>` : ""}
             </div>`;
@@ -326,6 +400,73 @@
           return String(result?.text || "").trim();
         }
 
+
+        function renderProcessScene(kind) {
+          const a = state.archive || {};
+          if (kind === "迎亲") {
+            view.innerHTML = `
+              <div class="hj-scene">
+                ${topbar("迎亲","rituals")}
+                <div class="hj-curtain"></div>
+                <div class="hj-lantern-wrap"><div class="hj-lantern"></div><div class="hj-lantern" style="animation-delay:.8s"></div></div>
+                <div class="hj-scene-main"><div class="hj-scene-card">
+                  <div class="hj-scene-kicker">良 辰 吉 时</div>
+                  <div class="hj-scene-title">迎卿入礼</div>
+                  <div class="hj-scene-copy">灯影微摇，金线成章。良辰既择，嘉礼将启。</div>
+                </div></div>
+                <div class="hj-scene-bottom"><button class="hj-primary" data-action="scene-next" data-next="却扇">吉时已至</button></div>
+              </div>`;
+          } else if (kind === "却扇") {
+            const c = state.selectedChar;
+            view.innerHTML = `
+              <div class="hj-scene">
+                ${topbar("却扇","rituals")}
+                <div class="hj-scene-main"><div class="hj-scene-card">
+                  <div class="hj-scene-kicker">却 扇 相 见</div>
+                  <div class="hj-scene-title">见君</div>
+                  <div class="hj-fan-stage">
+                    <div class="hj-face">${c?.avatar ? `<img src="${esc(c.avatar)}">` : `<div class="hj-avatar-fallback">${esc((partnerName()).slice(0,1))}</div>`}</div>
+                    <div class="hj-fan" id="hj-fan"></div>
+                  </div>
+                  <div class="hj-toastline" id="hj-fan-line">一扇之间，藏今日第一眼。</div>
+                  <button class="hj-secondary" data-action="open-fan">却扇</button>
+                </div></div>
+                <div class="hj-scene-bottom"><button class="hj-primary" data-action="scene-next" data-next="合卺">入合卺礼</button></div>
+              </div>`;
+          } else if (kind === "合卺") {
+            view.innerHTML = `
+              <div class="hj-scene">
+                ${topbar("合卺","rituals")}
+                <div class="hj-scene-main"><div class="hj-scene-card">
+                  <div class="hj-scene-kicker">卺 分 为 二 · 合 而 为 一</div>
+                  <div class="hj-scene-title">合卺</div>
+                  <div class="hj-cups" id="hj-cups">
+                    <div class="hj-cup left"></div><div class="hj-cup right"></div><div class="hj-flash"></div>
+                  </div>
+                  <div class="hj-toastline" id="hj-cup-line">两盏未合，礼尚未成。</div>
+                  <button class="hj-secondary" data-action="join-cups">共饮合卺</button>
+                </div></div>
+                <div class="hj-scene-bottom"><button class="hj-primary" data-action="scene-next" data-next="结发">入结发礼</button></div>
+              </div>`;
+          } else {
+            view.innerHTML = `
+              <div class="hj-scene">
+                ${topbar("结发","rituals")}
+                <div class="hj-scene-main"><div class="hj-scene-card">
+                  <div class="hj-scene-kicker">结 发 同 心</div>
+                  <div class="hj-scene-title">白首为期</div>
+                  <div class="hj-thread-stage" id="hj-thread-stage">
+                    <div class="hj-thread left"></div><div class="hj-thread right"></div><div class="hj-thread-knot">∞</div>
+                  </div>
+                  <div class="hj-toastline" id="hj-thread-line">两缕未系，尚待同心。</div>
+                  <button class="hj-secondary" data-action="tie-thread">结发</button>
+                </div></div>
+                <div class="hj-scene-bottom"><button class="hj-primary" data-action="to-vows">共书婚誓</button></div>
+              </div>`;
+          }
+          bind();
+        }
+
         function renderVows() {
           const a = state.archive || {};
           view.innerHTML = `
@@ -355,7 +496,7 @@
             ${topbar("婚书","vows")}
             <div class="hj-page">
               <div class="hj-stepper"><i class="hj-dot on"></i><i class="hj-dot on"></i><i class="hj-dot on"></i><i class="hj-dot on"></i><i class="hj-dot on"></i></div>
-              <div class="hj-certificate">
+              <div class="hj-certificate hj-cert-reveal">
                 <div class="hj-cert-top">嘉 礼 初 成 · 两 姓 婚 盟</div>
                 <div class="hj-cert-title">婚书</div>
                 <div class="hj-cert-names">
@@ -370,17 +511,23 @@
                   <div>「${esc(a.vowUser || "愿此后朝暮相守，岁岁同心。")}」</div>
                   <div style="margin-top:8px">「${esc(a.vowPartner || "愿与你共看人间灯火，共守寻常岁月。")}」</div>
                 </div>
-                <div class="hj-seal">合卺<br>之印</div>
+                ${completed ? `<div class="hj-seal">合卺<br>之印</div>` : `
+                  <div class="hj-longpress" id="hj-longpress">
+                    <div class="hj-longpress-ring"></div>
+                    <div class="hj-longpress-seal">合卺<br>之印</div>
+                  </div>
+                  <div class="hj-section-desc" style="text-align:center;margin-bottom:2px">长按印章，落印成书</div>`}
                 <div class="hj-cert-foot">
                   婚期：${esc(a.weddingDate ? fmtDate(new Date(a.weddingDate).getTime()) : fmtDate())}<br>
                   婚书编号：${esc(a.marriageNo || "HJ-"+Date.now().toString(36).toUpperCase())}
                 </div>
               </div>
               <div class="hj-actions" style="justify-content:center">
-                ${completed ? `<button class="hj-secondary" data-action="home">返回纪年</button>` : `<button class="hj-primary" data-action="complete">落印成书</button>`}
+                ${completed ? `<button class="hj-secondary" data-action="home">返回纪年</button>` : `<button class="hj-ghost" data-action="complete">直接落印</button>`}
               </div>
             </div>`;
           bind();
+          if (!completed) bindLongPress();
         }
 
         function renderAnniversary() {
@@ -415,6 +562,40 @@
           const base = state.archive || { id: uid(), createdAt: Date.now() };
           state.archive = Object.assign({}, base, patch);
           await storage.set("currentMarriage", state.archive);
+        }
+
+
+        function bindLongPress() {
+          const el = view.querySelector("#hj-longpress");
+          if (!el) return;
+          let timer = null, raf = null, start = 0, done = false;
+          const ring = el.querySelector(".hj-longpress-ring");
+
+          const stop = () => {
+            clearTimeout(timer); cancelAnimationFrame(raf);
+            el.classList.remove("holding");
+            if (!done) ring?.style.setProperty("--hold","0%");
+          };
+          const tick = () => {
+            const p = Math.min(100, ((performance.now()-start)/1200)*100);
+            ring?.style.setProperty("--hold", `${p}%`);
+            if (p < 100 && !done) raf = requestAnimationFrame(tick);
+          };
+          const begin = (ev) => {
+            ev.preventDefault();
+            done = false; start = performance.now();
+            el.classList.add("holding");
+            raf = requestAnimationFrame(tick);
+            timer = setTimeout(async () => {
+              done = true;
+              await saveArchive({completedAt:Date.now()});
+              try { navigator.vibrate?.(45); } catch(_){}
+              toast("嘉礼成 · 此书既成，岁岁为证");
+              setTimeout(renderAnniversary, 650);
+            },1200);
+          };
+          el.addEventListener("pointerdown", begin);
+          ["pointerup","pointercancel","pointerleave"].forEach(t=>el.addEventListener(t, stop));
         }
 
         function bind() {
@@ -485,7 +666,30 @@
                   renderRituals();
                 }
               }
+              if (action === "open-fan") {
+                const fan = view.querySelector("#hj-fan");
+                fan?.classList.add("open");
+                const line = view.querySelector("#hj-fan-line");
+                if (line) line.textContent = `${partnerName()}：今日见你，此后便记作余生第一眼。`;
+                const rituals = Object.assign({}, state.archive?.rituals || {}, {"却扇":true});
+                await saveArchive({rituals});
+              }
+              if (action === "join-cups") {
+                view.querySelector("#hj-cups")?.classList.add("join");
+                const line = view.querySelector("#hj-cup-line");
+                if (line) line.textContent = "合卺既成，自此同甘共苦。";
+                const rituals = Object.assign({}, state.archive?.rituals || {}, {"合卺":true});
+                await saveArchive({rituals});
+              }
+              if (action === "tie-thread") {
+                view.querySelector("#hj-thread-stage")?.classList.add("tied");
+                const line = view.querySelector("#hj-thread-line");
+                if (line) line.textContent = "结发同心，白首为期。";
+                const rituals = Object.assign({}, state.archive?.rituals || {}, {"结发":true});
+                await saveArchive({rituals});
+              }
               if (action === "to-vows") return renderVows();
+              if (action === "scene-next") return renderProcessScene(el.dataset.next);
               if (action === "ai-vows") {
                 if (state.loading) return;
                 state.loading = true; el.disabled = true; el.textContent = "代拟中…";
