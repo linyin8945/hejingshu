@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "中式婚礼仪式与婚书纪念插件：择良人、行嘉礼、共书婚誓、生成婚书与婚后纪年。",
   "author": "linyin8945",
-  "entry": "https://raw.githubusercontent.com/你的用户名/你的仓库名/main/hejingshu.js",
+  "entry": "https://raw.githubusercontent.com/linyin8945/hejingshu/main/hejingshu.js",
   "hash": "",
   "permissions": [
     "persona:read",
