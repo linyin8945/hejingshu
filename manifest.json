@@ -1,7 +1,8 @@
-"id": "hejingshu",
+{
+  "id": "hejingshu",
   "name": "合卺书",
-  "version": "0.4.0",
-  "description": "合卺书·大婚视觉版：接入正式红金婚礼素材，贯穿亲迎、却扇、出阁、华堂、拜礼、合卺、结发、婚誓、婚书、礼成、喜宴与婚后晨起。",
+  "version": "0.5.0",
+  "description": "《合卺书》嘉礼重构版：参与式亲迎、却扇、沃盥、同牢、合卺、结发、婚誓、双印、礼成、喜宴、花烛与岁岁帖；接入跨场景音乐系统。",
   "author": "linyin8945",
   "entry": "https://raw.githubusercontent.com/linyin8945/hejingshu/main/hejingshu.js",
   "hash": "",
