@@ -3,7 +3,7 @@
 
   const PLUGIN_ID = "hejingshu";
   const APP_ID = "hejingshu-home";
-  const VERSION = "0.8.0";
+  const VERSION = "0.8.1";
 
   const GOLD = "#D6B56A";
   const DEEP_RED = "#6F0D14";
@@ -961,6 +961,148 @@
     url("https://raw.githubusercontent.com/linyin8945/hejingshu/main/assets/scenes/vows-scroll.webp") center/cover no-repeat !important;
 }
 
+
+/* =========================================================
+   v0.8.1 · 沉浸层级修复
+   剧情不再叠卡 / 拜堂三礼 / 沃盥下移 / 婚誓滚动与背景修复
+   ========================================================= */
+
+/* 取消会遮挡画面和按钮的剧情浮卡；剧情统一回到页面原有正文区域 */
+.hj-story-cinema{display:none !important}
+.hj-prelude-narration{display:none !important}
+
+/* 底部内容区本身可滚动，避免剧情和按钮互相覆盖 */
+.hj-film-content{
+  max-height:53% !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch !important;
+  overscroll-behavior-y:contain;
+  padding-top:18px !important;
+}
+.hj-film-line{
+  max-height:20vh;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding-right:2px;
+}
+.hj-film-actions{padding-bottom:2px}
+
+/* 大婚前夜：视角与互动统一成规整两列，推进按钮独占一行 */
+.hj-pre-actions{
+  width:100%;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.hj-pre-actions > button{
+  width:100%;
+  min-width:0;
+  padding-left:12px;
+  padding-right:12px;
+}
+.hj-pre-actions > .hj-pre-primary{
+  grid-column:1 / -1;
+}
+.hj-pre-actions > .hj-custom-action{
+  grid-column:auto;
+}
+
+/* 自定义输入仍是临时层，提交后立即收起 */
+.hj-custom-sheet{
+  max-height:58%;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* 拜堂不再出现大圆按钮 */
+.hj-bow-emblem{display:none !important}
+.hj-bow-progress{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:12px 0 4px;
+}
+.hj-bow-progress span{
+  flex:1;height:3px;border-radius:99px;
+  background:rgba(224,193,116,.16);
+}
+.hj-bow-progress span.on{
+  background:linear-gradient(90deg,#a97732,#e1c474);
+}
+.hj-bow-current{
+  margin:9px 0 0;
+  font-size:11px;
+  letter-spacing:.18em;
+  color:#dcc58d;
+}
+
+/* 沃盥礼器整体下移，更像摆在案前，而不是悬在画面中央 */
+.hj-wash-object{
+  position:absolute;
+  left:50%;
+  top:46%;
+  z-index:6;
+  transform:translate(-50%,-50%);
+}
+.hj-wash-object .hj-water-bowl{
+  transform:scale(.92);
+  transform-origin:center;
+}
+
+/* 婚誓页：强制换成另一张卷轴/婚书素材，并建立真正可滚动容器 */
+.hj-vow-book{
+  position:absolute !important;
+  inset:0 !important;
+  background:
+    linear-gradient(180deg,rgba(43,4,7,.18),rgba(43,4,7,.50)),
+    url("https://raw.githubusercontent.com/linyin8945/hejingshu/main/assets/scenes/officiant-scroll.webp") center/cover no-repeat !important;
+}
+.hj-vow-panel{
+  top:92px !important;
+  bottom:18px !important;
+  max-height:none !important;
+  height:auto !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch !important;
+  touch-action:pan-y !important;
+  overscroll-behavior-y:contain;
+  padding-bottom:36px !important;
+}
+.hj-vow-panel .hj-textarea{min-height:128px}
+
+/* 双印婚书：从顶部到最下方按钮都能完整滚动 */
+.hj-book-live{
+  position:absolute !important;
+  inset:0 !important;
+  height:auto !important;
+  min-height:100% !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch !important;
+  touch-action:pan-y !important;
+  overscroll-behavior-y:contain;
+  padding-bottom:calc(180px + env(safe-area-inset-bottom)) !important;
+}
+.hj-book-paper{
+  margin-top:58px !important;
+  margin-bottom:72px !important;
+}
+.hj-book-live .hj-v5-top{
+  position:fixed !important;
+  left:0;right:0;top:0;
+}
+
+/* 选人页避免“产品介绍感” */
+.hj-choose-poem{
+  margin:4px 0 18px;
+  color:#d8c59d;
+  font-size:12px;
+  line-height:1.9;
+}
+.hj-memory-toggle-copy{line-height:1.6}
+
 </style>`;
   }
 
@@ -1142,8 +1284,7 @@
         }
 
         function storyCard(label,text,top="48%") {
-          if(!text) return "";
-          return `<div class="hj-story-cinema" style="top:${esc(top)}"><div class="hj-story-action">${esc(label)}</div>${esc(text)}</div>`;
+          return "";
         }
 
         function weddingHistoryContext() {
@@ -1187,13 +1328,13 @@
             title:"这一夜，你想……",
             saveKey:"preCustomLine",
             rerender:"prewedding",
-            task:(input)=>`大婚前夜，USER在自己的住处，与新郎分开。USER选择了一个属于自己的动作或想法：“${input}”。请写一段现代中式婚礼前夜剧情。两人此刻空间分离，绝不能写拥抱、触碰、同处一室。可以写环境、亲友准备、手机消息或远方的新郎视角。`
+            task:(input)=>`大婚前夜，USER在自己的住处，与新郎分开。USER选择了一个属于自己的动作或想法：“${input}”。请写一段现代中式婚礼前夜剧情。两人此刻空间分离，绝不能写拥抱、触碰、同处一室。可以写环境、亲友准备或远方的新郎视角；不要主动加入手机、社交软件等现代物件。`
           },
           procession: {
             title:"迎亲将至，你想……",
             saveKey:"processionLine",
             rerender:"procession",
-            task:(input)=>`现代中式婚礼迎亲现场，USER选择：“${input}”。请写一段迎亲将至的现场剧情，要有具体群众氛围：亲友、伴娘伴郎、摄影师或围观宾客中的一两笔，并让${partnerDisplayName()}自然存在于迎亲队伍中。`
+            task:(input)=>`现代中式婚礼迎亲现场，USER选择：“${input}”。请写一段迎亲将至的现场剧情，要有具体群众氛围：亲友、伴娘伴郎或宾客中的一两笔，并让${partnerDisplayName()}自然存在于迎亲队伍中。`
           },
           door: {
             title:"隔着门，你想……",
@@ -1211,7 +1352,7 @@
             title:"出阁这一刻，你想……",
             saveKey:"handLine",
             rerender:"hand",
-            task:(input)=>`现代中式婚礼出阁环节，USER选择：“${input}”。写${partnerDisplayName()}如何回应，并写一两笔身边亲友、伴娘或摄影师的自然存在。`
+            task:(input)=>`现代中式婚礼出阁环节，USER选择：“${input}”。写${partnerDisplayName()}如何回应，并写一两笔身边亲友或伴娘的自然存在。`
           },
           sedan: {
             title:"花轿途中，你想……",
@@ -1223,13 +1364,13 @@
             title:"入堂之前，你想……",
             saveKey:"hallLine",
             rerender:"hall",
-            task:(input)=>`现代中式婚礼即将入堂，USER选择：“${input}”。写满堂宾客、司仪、摄影师等现场氛围，并让${partnerDisplayName()}自然回应。`
+            task:(input)=>`现代中式婚礼即将入堂，USER选择：“${input}”。写满堂宾客与司礼等现场氛围，并让${partnerDisplayName()}自然回应。`
           },
           banquet: {
             title:"喜宴席间，你想……",
             saveKey:"banquetLine",
             rerender:"banquet",
-            task:(input)=>`现代中式婚礼喜宴上，USER选择：“${input}”。写一段席间现场剧情，要有宾客、朋友或工作人员的一两笔，但焦点仍在她与${partnerDisplayName()}。`
+            task:(input)=>`现代中式婚礼喜宴上，USER选择：“${input}”。写一段席间现场剧情，要有宾客或朋友的一两笔，但焦点仍在她与${partnerDisplayName()}。`
           },
           veil: {
             title:"婚房门合上后，你想……",
@@ -1535,7 +1676,7 @@
           } catch(_) {}
           const result = await roche.ai.chat({
             messages:[
-              {role:"system",content:`你正在参与一场发生在现代世界里的正式中式婚礼。婚服、礼仪与视觉审美传统化，但所有人物都是现代人，拥有现代身份、关系与生活经验。最重要的是让新郎始终是原本的他，而不是套用任何古风男主或婚礼模板。公共场景允许自然出现亲友、伴郎伴娘、司仪、摄影师、工作人员与宾客，但群众描写必须具体、短暂、不抢新人戏份。文字应有场景、留白、细微动作和适度对白，具体、克制、温柔，避免空洞排比、滥用“眼底”“宠溺”“此生不负”等陈词，也不要凭空编造两人的重大往事。进入拜堂、正礼、婚誓与落印时自然收敛，体现尊重、承担、珍惜与双方平等。不要戏谑婚礼本身，不要替 USER 决定情绪、台词或未选择的动作，不描写具体脸部五官。除非任务明确要求第一人称对白，否则叙述新郎动作必须用新郎姓名或“他”，只有说出口的话可以使用“我”。禁止括号舞台说明。`},
+              {role:"system",content:`你正在参与一场发生在现代世界里的正式中式婚礼。婚服、礼仪与视觉审美传统化，但所有人物都是现代人，拥有现代身份、关系与生活经验。最重要的是让新郎始终是原本的他，而不是套用任何古风男主或婚礼模板。公共场景允许自然出现亲友、伴郎伴娘、司礼与宾客，但群众描写必须具体、短暂、不抢新人戏份。现代背景只体现在人物关系和自然语言里；除非 USER 主动提及，否则不要刻意写手机、社交软件、摄影设备、工作人员流程等容易破坏中式婚礼氛围的现代物件。文字应有场景、留白、细微动作和适度对白，具体、克制、温柔，避免空洞排比、滥用“眼底”“宠溺”“此生不负”等陈词，也不要凭空编造两人的重大往事。进入拜堂、正礼、婚誓与落印时自然收敛，体现尊重、承担、珍惜与双方平等。不要戏谑婚礼本身，不要替 USER 决定情绪、台词或未选择的动作，不描写具体脸部五官。除非任务明确要求第一人称对白，否则叙述新郎动作必须用新郎姓名或“他”，只有说出口的话可以使用“我”。禁止括号舞台说明。`},
               {role:"system",content:`USER人设：\n${userPersona}\n\n新郎人设：\n${charPersona}\n\n可参考的既有关系记忆：\n${memoryText||"无"}\n\n这场婚礼中已经真实发生的片段，后续情节需要自然承接，不要机械重复：\n${weddingHistoryContext()||"婚礼尚未开始"}\n\n当前婚礼：${a.userMarriageName||userName()} 与 ${a.partnerMarriageName||partnerName()} 的正式婚礼。`},
               {role:"user",content:task + `\n请控制在${maxChars}字以内。`}
             ],temperature:.72
@@ -1946,13 +2087,13 @@
           }).join("");
           view.innerHTML = `${musicTop("择新人","home")}<div class="hj-page" style="padding-top:72px">
             <div class="hj-section-title">今有良辰，择一人共赴此日</div>
-            <div class="hj-section-desc">这不是角色换装，也不是穿越。你们仍生活在今天，只是选择用一场郑重的中式婚礼，把“成为夫妻”认真地说给彼此与重要的人听。</div>
+            <div class="hj-choose-poem">吉期未启，婚书待题。今日，你愿与谁共行嘉礼？</div>
             <div class="hj-label">卿</div><div class="hj-grid">${userCards||`<div class="hj-card">未读取到 USER 人设。</div>`}</div>
             <div class="hj-label" style="margin-top:20px">良人</div><div class="hj-grid">${charCards||`<div class="hj-card">未读取到角色。</div>`}</div>
             ${state.selectedChar?`<div class="hj-card" style="margin-top:18px;text-align:center"><div class="hj-sub">今日，他将着婚服、执婚书，于众人见证之下与你结为夫妻</div><div class="hj-section-title" style="font-size:22px">${esc(userName())} · ${esc(partnerName())}</div></div>`:""}
             <div class="hj-memory-toggle">
               <div class="hj-memory-toggle-row">
-                <div><div class="hj-memory-toggle-title">写入 Roche 主记忆</div><div class="hj-memory-toggle-copy">关闭：婚礼只保存在《合卺书》内部。开启：婚礼完整落幕后，再尝试将成婚事实与双方婚誓一次性写入当前 CHAR 的主记忆。</div></div>
+                <div><div class="hj-memory-toggle-title">写入 Roche 主记忆</div><div class="hj-memory-toggle-copy">开启后，礼成落幕时再将成婚事实与婚誓一并珍藏。</div></div>
                 <button class="hj-switch ${a.writeRocheMemory?"on":""}" data-action="toggle-main-memory-v8" aria-label="切换写入 Roche 主记忆"><i></i></button>
               </div>
             </div>
@@ -1984,28 +2125,27 @@
           const viewMode=a.prePerspective||"user";
           const isGroom=viewMode==="groom";
           const asset=isGroom?"bridalRoomAlt":"bridePrep";
-          const mainLine=isGroom
-            ? `${esc(partnerDisplayName())} 那边也还亮着灯。明日他会来迎你，而今晚，你们各自在自己的房间里等天亮。`
-            : `夜已经很深了。喜服、婚书与明日要用的礼物都已备好。再过几个时辰，门外便会响起迎亲的礼乐。`;
+          const generated=isGroom?a.groomNightLine:(a.preCustomLine||a.preNightLine);
+          const baseLine=isGroom
+            ? `另一处灯火未熄。${esc(partnerDisplayName())} 的婚服已经备好，明日，他会从这里出发来迎你。`
+            : `夜渐深，喜服与凤冠都已收拾妥当。屋里的人声一点点轻下来，只等天亮之后，迎亲礼乐从门外响起。`;
           view.innerHTML = filmShell({
             asset,title:"大婚前夜",kicker:isGroom?"另 一 处 · 新 郎":"待 嫁 · 今 夜",
-            line:mainLine,
-            actions:`<div class="hj-prelude-tabs">
-                        <button class="${!isGroom?"on":""}" data-action="pre-view-v8" data-view="user">看你这边</button>
-                        <button class="${isGroom?"on":""}" data-action="pre-view-v8" data-view="groom">看看他此刻</button>
-                     </div>
-                     ${!isGroom?`<button class="hj-secondary" data-action="pre-listen-v8">听窗外的动静</button>
-                     <button class="hj-secondary" data-action="pre-book-v8">再看一眼婚书</button>`:
-                     `<button class="hj-secondary" data-action="pre-groom-v8">${a.groomNightLine?"再看看他":"看看他在做什么"}</button>`}
-                     <button class="hj-secondary" data-action="gen-letter">${a.preLetter?"重读他的婚前笺":"等一封婚前笺"}</button>
-                     ${customButton("prewedding")}
-                     <button class="hj-primary" data-action="start-pickup-v5">待到吉时</button>`,
+            line:generated?esc(generated):baseLine,
+            actions:`<div class="hj-pre-actions">
+                       <button class="hj-secondary ${!isGroom?"on":""}" data-action="pre-view-v8" data-view="user">看你这边</button>
+                       <button class="hj-secondary ${isGroom?"on":""}" data-action="pre-view-v8" data-view="groom">看看他此刻</button>
+                       ${!isGroom?`
+                         <button class="hj-secondary" data-action="pre-listen-v8">听窗外的动静</button>
+                         <button class="hj-secondary" data-action="pre-book-v8">再看一眼婚书</button>`
+                         : `<button class="hj-secondary" data-action="pre-groom-v8">${a.groomNightLine?"再看一会儿":"看看他在做什么"}</button>
+                            <button class="hj-secondary" data-action="gen-letter">${a.preLetter?"重读婚前笺":"等一封婚前笺"}</button>`}
+                       ${!isGroom?`<button class="hj-secondary" data-action="gen-letter">${a.preLetter?"重读婚前笺":"等一封婚前笺"}</button>`:""}
+                       ${customButton("prewedding")}
+                       <button class="hj-primary hj-pre-primary" data-action="start-pickup-v5">待到吉时</button>
+                     </div>`,
             back:"names",
-            extra:`<div class="hj-prelude-narration">${isGroom
-              ? `他并不在你身边。房间里只有婚服、灯影和明日要用的东西。有人从门外提醒他别熬太晚，手机屏幕亮了又暗。`
-              : `有人最后一次检查你的凤冠与衣摆，摄影师说明早会提前到，亲友的消息还在不断跳出来。房间不算安静，却已经有了“明天真的要结婚”的感觉。`}</div>
-              ${storyCard(isGroom?"新 郎 · 婚 前 夜":"待 嫁 · 婚 前 夜",isGroom?a.groomNightLine:(a.preCustomLine||a.preNightLine),"50%")}
-              ${a.preLetter?`<div class="hj-letter-panel"><div class="hj-film-kicker">婚 前 笺 · ${esc(partnerDisplayName())}</div>${esc(a.preLetter)}</div>`:""}`
+            extra:""
           });
           bind();
         }
@@ -2013,16 +2153,18 @@
         function renderProcessionV5() {
           music.play("procession",.5);
           const a=state.archive||{};
+          const line=a.processionLine
+            ? esc(a.processionLine)
+            : `礼乐先从长街那头传来。门外等候的亲友渐渐聚到一处，伴娘笑着压低声音说“到了”，院里原本零碎的说话声也跟着热闹起来。再近一些，便能听见迎亲队伍的脚步。`;
           view.innerHTML=filmShell({
             asset:"procession",title:"他来了",kicker:"亲 迎 · 长 街",
-            line:a.processionLine
-              ? "迎亲队伍已经到了近前。原本只是远处的礼乐，现在连门内的人都能分辨出朋友们起哄的声音。"
-              : "礼乐从长街另一头渐渐近了。门外的亲友陆续起身，有人举起手机，有人笑着往院门那边跑；伴娘回头催你别动，自己却先忍不住笑起来。",
-            actions:a.processionLine
-              ? `<button class="hj-secondary" data-action="procession-look-v8">再隔窗看一眼</button><button class="hj-secondary" data-action="procession-hear-v8">只听他的脚步</button>${customButton("procession")}<button class="hj-primary" data-action="to-door-v5">迎亲已至 · 去听叩门</button>`
-              : `<button class="hj-secondary" data-action="procession-look-v8">隔窗看一眼</button><button class="hj-secondary" data-action="procession-hear-v8">只听他的脚步</button>${customButton("procession")}<button class="hj-primary" data-action="to-door-v5">迎亲已至</button>`,
+            line,
+            actions:`<button class="hj-secondary" data-action="procession-look-v8">隔窗看一眼</button>
+                     <button class="hj-secondary" data-action="procession-hear-v8">只听他的脚步</button>
+                     ${customButton("procession")}
+                     <button class="hj-primary" data-action="to-door-v5">迎亲已至 · 去听叩门</button>`,
             back:"prewedding",position:"center",
-            extra:storyCard("亲 迎 · 人 声 渐 近",a.processionLine,"49%")
+            extra:""
           });
           bind();
         }
@@ -2031,8 +2173,8 @@
           const a=state.archive||{};
           view.innerHTML=filmShell({
             asset:"pickupDoor",title:"朱门叩问",kicker:"亲 迎",
-            line:"门没有立刻打开。今日第一问，不问礼数，只问真心。",
-            help:"亲迎，是婚礼中由新郎亲自迎娶新娘的礼仪。这里的叩门互动是《合卺书》的现代化婚俗设计，用来让新郎真正表达“为什么今日来娶你”。",
+            line:a.doorAnswer?`${esc(a.partnerMarriageName||partnerName())}：${esc(a.doorAnswer)}`:"门没有立刻打开。门里有人忍着笑，门外也有人低声起哄。今日第一问，不问礼数，只问真心。",
+            help:"亲迎：新郎亲自前来迎娶新娘。叩门在此作为迎亲中的一道问心，让门外的人认真回答为何而来。",
             actions:a.doorAnswer
               ? `<button class="hj-secondary" data-action="door-question">再隔门问一句</button>
                  <button class="hj-primary" data-action="door-open-v5">开门 · 去见他</button>`
@@ -2056,12 +2198,14 @@
               : "";
           view.innerHTML=filmShell({
             asset:"queshan",title:"却扇",kicker:"出 阁 · 相 见",
-            line:peek===0
-              ? `${pname} 已入阁。今日第一次相见，不急着移扇。`
-              : peek===1
-                ? `扇缘轻移。你们之间只余最后一点遮挡。`
-                : `团扇已却。这一眼，从此留在今日。`,
-            help:"却扇是古代婚俗中以扇遮面、待礼而却扇相见的意象。它与洞房后的“揭盖头”不是同一个环节；揭盖头会放在喜宴之后。",
+            line:a.firstLook
+              ? esc(a.firstLook)
+              : peek===0
+                ? `${pname} 已入阁。今日第一次相见，不急着移扇。`
+                : peek===1
+                  ? `扇缘轻移。你们之间只余最后一点遮挡。`
+                  : `团扇已却。这一眼，从此留在今日。`,
+            help:"却扇：以团扇遮面，待礼而却扇相见。与洞房中的揭盖头并非同一环节。",
             actions:peek===0
               ? `<button class="hj-secondary" data-action="fan-call">隔扇唤他</button><button class="hj-primary" data-action="fan-touch" data-peek="1">轻移团扇</button>${customButton("fan")}`
               : peek===1
@@ -2090,8 +2234,8 @@
           view.innerHTML=filmShell({
             asset:"sedanJourney",title:"花轿归程",kicker:"归 门",
             line:a.sedanLine
-              ? "轿子仍在向喜堂去。方才那一点声音，却让这段路不再只是过场。"
-              : "轿帘轻晃，长街上的喧声渐远。你能听见轿外脚步与马蹄，也知道他就在这支迎亲队伍里。",
+              ? esc(a.sedanLine)
+              : "轿帘轻晃，长街上的喧声渐远。你能听见轿外脚步与礼乐，也知道他就在这支迎亲队伍里。",
             actions:a.sedanLine
               ? `<button class="hj-secondary" data-action="sedan-curtain">再掀一点轿帘</button><button class="hj-primary" data-action="arrive-v5">继续归程 · 待轿停</button>`
               : `<button class="hj-secondary" data-action="sedan-curtain">掀一点轿帘</button>
@@ -2127,13 +2271,30 @@
         function renderBowV7() {
           music.play("ceremony",.39);
           const a=state.archive||{};
+          const step=Number(a.bowStep||0);
+          const names=["一拜天地","二拜见证","夫妻对拜"];
+          const intro=[
+            "司礼唱：一拜天地——敬天地，也敬今日这一场郑重。",
+            "司礼唱：二拜见证——向今日在堂前见证你们的人致礼。",
+            "司礼唱：夫妻对拜——从这一礼起，彼此相敬，同心同行。"
+          ];
+          const done=step>=3;
+          const line=a.bowLine
+            ? esc(a.bowLine)
+            : done
+              ? "三拜俱成。堂前短暂安静了一瞬，随后才重新有了笑声。"
+              : intro[step];
           view.innerHTML=filmShell({
-            asset:"bowCeremony",title:"拜堂",kicker:"正 婚 · 第 一 礼",
-            line:a.bowDone?"一拜礼成。不是谁属于谁，而是你们在天地与灯火之间，认真地选择了彼此。":"司礼唱：新人对拜——这一礼，向天地，也向此刻与你并肩的人。",
-            help:"拜堂在不同年代和地区有不同礼序。《合卺书》保留最重要的新人对拜，不默认任何家庭关系，也不强制代入父母称谓；这一礼由两位新人平等相向、郑重成礼。",
-            actions:a.bowDone?`<button class="hj-primary" data-action="to-wash-v5">礼成 · 净手入席</button>`:`<button class="hj-primary" data-action="perform-bow-v7">与 ${esc(partnerDisplayName())} 相对而拜</button>`,
+            asset:"bowCeremony",title:"拜堂",kicker:`正 婚 · 第 一 礼${done?" · 礼 成":""}`,
+            line,
+            help:"拜堂礼序因地域与家庭安排而异。这里保留三次递进：一拜天地、二拜见证、夫妻对拜；第二拜不强制代入任何具体家庭关系。",
+            actions:done
+              ? `<button class="hj-primary" data-action="to-wash-v5">三拜礼成 · 净手入席</button>`
+              : `<div class="hj-bow-progress"><span class="${step>=0?"on":""}"></span><span class="${step>=1?"on":""}"></span><span class="${step>=2?"on":""}"></span></div>
+                 <div class="hj-bow-current">${names[step]}</div>
+                 <button class="hj-primary" data-action="perform-bow-v7">与 ${esc(partnerDisplayName())} · ${names[step]}</button>`,
             back:"hall",
-            extra:`<button class="hj-bow-emblem hj-touch-trigger ${a.bowDone?"done":""}" data-action="${a.bowDone?"to-wash-v5":"perform-bow-v7"}" aria-label="${a.bowDone?"进入沃盥礼":"触碰行拜堂礼"}">${a.bowDone?"礼成":"对拜"}</button>${storyCard("拜 堂 · 相 向",a.bowLine,"54%")}`
+            extra:""
           });
           bind();
         }
@@ -2143,11 +2304,11 @@
           const a=state.archive||{};
           view.innerHTML=filmShell({
             asset:"weddingHallEntry",title:"沃盥",kicker:"正 婚 · 第 二 礼",
-            line:done?"水纹渐静。你们都已净手，正礼由此真正开始。":"司礼：沃盥——新人净手。",
-            help:"沃盥：新人入席前以清水净手。取去尘净心、郑重入礼之意。这里不把它当作“点一下完成”，而是让你亲手触水。",
-            actions:done?`<button class="hj-primary" data-action="to-tonglao-v5">同席而食</button>`:`<button class="hj-secondary" data-action="wash-water">触碰水面</button>`,
+            line:a.washLine?esc(a.washLine):(done?"水纹渐静。你们都已净手，正礼由此真正进入席间。":"司礼唱礼：“沃盥。” 清水置于案前，新人依次净手。"),
+            help:"沃盥：新人入席前以清水净手，取洁手正心、郑重入礼之意。",
+            actions:done?`<button class="hj-primary" data-action="to-tonglao-v5">净手礼成 · 同席而食</button>`:`<button class="hj-secondary" data-action="wash-water">以水净手</button>`,
             back:"bow",
-            extra:`<div class="hj-touch-object" style="position:absolute;left:50%;top:35%;z-index:7;transform:translateX(-50%)"><button id="hj-water" class="hj-water-bowl hj-touch-trigger ${done?"ripple":""}" data-action="${done?"to-tonglao-v5":"wash-water"}" aria-label="${done?"进入同牢礼":"触碰水面净手"}"></button></div>${storyCard("沃 盥 · 同 礼",a.washLine,"53%")}`
+            extra:`<div class="hj-wash-object"><button id="hj-water" class="hj-water-bowl hj-touch-trigger ${done?"ripple":""}" data-action="${done?"to-tonglao-v5":"wash-water"}" aria-label="${done?"进入同牢礼":"触碰水面净手"}"></button></div>`
           });
           bind();
         }
@@ -2158,7 +2319,7 @@
           const foods=["枣栗","同牢肉","黍饭"];
           view.innerHTML=filmShell({
             asset:"banquetToast",title:"同牢",kicker:"正 婚 · 第 三 礼",
-            line:selected?`你选了「${esc(selected)}」。从这一箸开始，是第一次以夫妻身份同席。`:"司礼：同牢——共席而食。",
+            line:a.tonglaoLine?esc(a.tonglaoLine):(selected?`你选了「${esc(selected)}」。从这一箸开始，是第一次以夫妻身份同席。`:"司礼唱礼：同牢——共席而食。"),
             help:"同牢：新人同席共食，象征从今日起同居一室、同食一席。它在传统婚礼礼制中与合卺前后相承。",
             actions:selected?`<button class="hj-primary" data-action="to-hejin-v5">下一礼 · 合卺</button>`:"",
             back:"wash",
@@ -2176,7 +2337,7 @@
           const done=!!a.hejinDone;
           view.innerHTML=filmShell({
             asset:"hejinCups",title:"合卺",kicker:"正 婚 · 第 四 礼",
-            line:done?"两卺已饮。杯盏轻碰的一声，被安静地留在正礼里。":lifted?"你执起自己的卺，他也端起另一只。两盏将在这一刻相合。":"司礼：合卺——新人各执其一。",
+            line:a.hejinLine?esc(a.hejinLine):(done?"两卺已饮。杯盏轻碰的一声，被安静地留在正礼里。":lifted?"你执起自己的卺，他也端起另一只。两盏将在这一刻相合。":"司礼唱礼：合卺——新人各执其一。"),
             help:"卺分为二，新人各执一半共饮，再合而为一。取从此甘苦同尝、夫妻一体之意。",
             actions:done
               ? `<button class="hj-primary" data-action="to-hair-v6">下一礼 · 结发</button>`
@@ -2192,8 +2353,8 @@
           const a=state.archive||{};
           view.innerHTML=filmShell({
             asset:"hairKnot",title:"结发",kicker:"正 婚 · 第 五 礼",
-            line:a.hairLine?"红线已经收紧，两缕青丝被一同收入锦囊。":"各取一缕青丝，以红线同系。它不会随着页面结束消失，而会被收入你们的婚藏。",
-            help:"结发在后世成为夫妻关系的重要象征。《合卺书》把两缕青丝与红线做成可永久保存的婚礼信物。",
+            line:a.hairLine?esc(a.hairLine):"各取一缕青丝，以红线同系。红线收紧，两缕青丝便从今日起被一同珍藏。",
+            help:"结发：各取一缕青丝，以红线同系，留作夫妻信物。",
             actions:a.hairKeepsake?`<button class="hj-primary" data-action="to-vows-v6">收好锦囊 · 请婚誓</button>`:`<button class="hj-primary" data-action="tie-hair-v5">系青丝</button>`,
             back:"hejin",
             extra:`<div class="hj-touch-object" style="position:absolute;left:50%;top:32%;z-index:7;transform:translateX(-50%)"><div class="hj-thread-interact"><button class="hj-thread-knot-v5 hj-touch-trigger" data-action="${a.hairKeepsake?"to-vows-v6":"tie-hair-v5"}" aria-label="${a.hairKeepsake?"进入婚誓":"触碰红线结发"}">结</button></div></div>${storyCard("结 发 · 为 信",a.hairLine,"53%")}`
@@ -2206,7 +2367,7 @@
           const a=state.archive||{};
           if(!a.vowPartner && !state.loading){
             state.loading=true;
-            view.innerHTML=filmShell({asset:"vowsScroll",title:"婚誓",kicker:"各 陈 一 诺",line:`${esc(partnerDisplayName())} 正在认真整理要对你说的话。`,actions:`<button class="hj-primary hj-gen-loading" disabled>${esc(partnerDisplayName())} 正在写下婚誓</button>`,back:"hair"});
+            view.innerHTML=filmShell({asset:"officiantScroll",title:"婚誓",kicker:"各 陈 一 诺",line:`${esc(partnerDisplayName())} 正在认真整理要对你说的话。`,actions:`<button class="hj-primary hj-gen-loading" disabled>${esc(partnerDisplayName())} 正在写下婚誓</button>`,back:"hair"});
             bind();
             try{
               const raw=await weddingAwareText("现在正婚礼已经行至婚誓。只写新郎真正对新娘说出口的婚誓正文。不要动作、心理、旁白、括号说明、引号套话。保持本人语言习惯，不要套用古风誓词；可以克制、嘴硬、寡言或温柔，但必须认真。可以自然承接今天婚礼中发生过的一处细节，并写清楚愿意在婚姻中做到的陪伴、尊重或承担。避免夸张的永恒誓言和未经证实的往事。",240);
@@ -2216,7 +2377,7 @@
             state.loading=false;
           }
           const b=state.archive||a;
-          view.innerHTML=`<div class="hj-film"><div class="hj-vow-book"></div>${musicTop("婚誓","hair")}
+          view.innerHTML=`<div class="hj-film" ${sceneStyle("officiantScroll","center")}><div class="hj-film-bg"></div><div class="hj-film-shade"></div><div class="hj-vow-book"></div>${musicTop("婚誓","hair")}
             <div class="hj-vow-panel">
               <div class="hj-film-kicker">请 二 位 · 各 陈 一 诺</div>
               <div class="hj-section-title" style="font-size:20px">${esc(b.partnerMarriageName||partnerName())}</div>
@@ -2298,8 +2459,8 @@
           view.innerHTML=filmShell({
             asset:"banquetHall",title:"入宴",kicker:"礼 成 · 灯 火 重 起",
             line:a.banquetEntryLine
-              ? "正礼的肃静终于松开。亲友们重新笑起来，摄影师招呼你们往宴席方向走，桌边有人已经举起杯子等着。"
-              : "司礼退到一旁，乐声重新响起。刚才还安静观礼的宾客一下有了笑声，朋友们围上来，摄影师在旁边提醒你们慢一点走。",
+              ? "正礼的肃静终于松开。亲友们重新笑起来，席间也渐渐有了说话声，桌边已经有人举起杯子等着你们。"
+              : "司礼退到一旁，乐声重新响起。刚才还安静观礼的宾客一下有了笑声，朋友们也渐渐围了过来。",
             actions:`<button class="hj-secondary" data-action="banquet-entry-look-v8">看看席间都在做什么</button>
                      <button class="hj-secondary" data-action="banquet-entry-char-v8">看他怎么应付朋友</button>
                      ${customButton("banquet")}
@@ -2315,7 +2476,7 @@
           const a=state.archive||{};
           view.innerHTML=filmShell({
             asset:"banquetHall",title:"喜宴",kicker:"礼 成 之 后",
-            line:"这已经不是正式礼仪。桌边有人敬酒，有朋友起哄，摄影师偶尔从旁边经过；你们终于可以从“新人”这个身份里松一点下来。",
+            line:"桌边有人敬酒，也有朋友笑着起哄。正礼已经结束，你们终于能在满堂灯火里稍稍松下来。",
             actions:`<button class="hj-secondary" data-action="banquet-talk-v5">偷看他</button>
                      <button class="hj-secondary" data-action="banquet-toast-v5">与他敬一杯</button>
                      <button class="hj-secondary" data-action="banquet-friend-v8">听朋友们起哄</button>
@@ -2333,8 +2494,8 @@
           view.innerHTML=filmShell({
             asset:"banquetToast",title:"席散",kicker:"夜 深 · 宾 客 渐 散",
             line:a.banquetEndLine
-              ? "最后一轮笑声也慢慢远了。工作人员开始收拾桌面，朋友们还在门口说最后几句话，热闹终于一点点退回夜色里。"
-              : "有人来告别，有人还拉着新郎多说两句。摄影师收起设备，桌上的杯盏渐空，宴堂终于显出夜深后的安静。",
+              ? "最后一轮笑声也慢慢远了。朋友们还在门口说最后几句话，桌上的杯盏渐空，热闹终于一点点退回夜色里。"
+              : "有人来告别，也有人还拉着新郎多说两句。桌上的杯盏渐空，宴堂终于显出夜深后的安静。",
             actions:`<button class="hj-secondary" data-action="banquet-goodbye-v8">和最后一拨朋友告别</button>
                      <button class="hj-secondary" data-action="banquet-wait-char-v8">等他从人群里回来</button>
                      <button class="hj-primary" data-action="return-room-v8">与他归房</button>`,
@@ -2474,6 +2635,7 @@
             doorAnswer: "",
             firstLook: "",
             bowDone: false,
+            bowStep: 0,
             bowLine: "",
             tonglaoFood: "",
             hejinDone: false,
@@ -2576,9 +2738,9 @@
               if(action==="pre-listen-v8"||action==="pre-book-v8"||action==="pre-groom-v8"){
                 const isGroom=action==="pre-groom-v8";
                 const task=isGroom
-                  ? `大婚前夜，镜头切到${partnerDisplayName()}自己的房间。他与 USER 此刻分处两地。写一段现代人的婚前夜：婚服、手机、朋友或工作人员的提醒、他独自准备明日迎亲的动作。绝不能让他和 USER 发生任何物理接触，也不要把场景写成古代。`
+                  ? `大婚前夜，镜头切到${partnerDisplayName()}自己的房间。他与 USER 此刻分处两地。写一段婚前夜：婚服、灯火、亲友的提醒，以及他独自准备明日迎亲的动作。绝不能让他和 USER 发生任何物理接触；人物语言保持现代自然，但不要主动写手机、社交软件等物件。`
                   : action==="pre-listen-v8"
-                  ? `大婚前夜，USER在自己的住处听窗外和屋里的动静。写亲友、化妆师、摄影师或工作人员准备明日婚礼的一两笔，保持现代世界。${partnerDisplayName()}不在现场。`
+                  ? `大婚前夜，USER在自己的住处听窗外和屋里的动静。写亲友为明日婚礼收拾、提醒、说话的一两笔。人物关系保持现代自然，但不要刻意写现代设备。${partnerDisplayName()}不在现场。`
                   : `大婚前夜，USER又看了一眼已经题好姓名与吉期、婚誓与双印仍留白的婚书。写一段安静旁白，明确${partnerDisplayName()}此刻在另一处准备明日迎亲，不得写他抱她、站在她身后或同处一室。`;
                 await withGenerateButton(el,isGroom?"正在看他那边":"这一夜仍在继续",async()=>{
                   const t=await weddingSceneText(task,190);
@@ -2588,8 +2750,8 @@
               }
               if(action==="procession-look-v8"||action==="procession-hear-v8"){
                 const task=action==="procession-look-v8"
-                  ? `现代中式婚礼迎亲队伍已经到了近前。USER隔窗看了一眼。写具体群众现场：亲友举手机、伴郎伴娘、摄影师或工作人员中的一两笔，再写${partnerDisplayName()}在迎亲队伍中的动作。不要古代百姓叙事。`
-                  : `现代中式婚礼迎亲将至。USER没有看，只听脚步、礼乐、朋友起哄和工作人员提醒。写一段以声音为主的现场剧情，让她能从人群中辨认出${partnerDisplayName()}越来越近。`;
+                  ? `现代中式婚礼迎亲队伍已经到了近前。USER隔窗看了一眼。写具体群众现场：亲友、伴郎伴娘或宾客中的一两笔，再写${partnerDisplayName()}在迎亲队伍中的动作。不要古代百姓叙事。`
+                  : `现代中式婚礼迎亲将至。USER没有看，只听脚步、礼乐、朋友起哄和工作人员提醒。写一段以声音、礼乐和人声为主的现场剧情，让她能从人群中辨认出${partnerDisplayName()}越来越近。`;
                 await withGenerateButton(el,action==="procession-look-v8"?"正在看迎亲队伍":"正在听越来越近的脚步",async()=>{
                   const t=await weddingSceneText(task,190);
                   await saveArchive({processionLine:t,directorStage:"procession"});
@@ -2700,9 +2862,21 @@
               if(action==="to-bow-v7"){await saveArchive({directorStage:"bow"});return renderBowV7()}
               if(action==="perform-bow-v7"){
                 try{navigator.vibrate?.(25)}catch(_){}
-                await withGenerateButton(el,`${partnerDisplayName()} 正与你对拜`,async()=>{
-                  const t=await weddingSceneText(`正婚礼行至拜堂。司礼唱礼，${partnerDisplayName()}与 USER 面对面郑重行新人对拜。写一段克制、细腻、有仪式感的现场剧情；强调双方平等相向，可写衣袖、烛光、停顿或他行礼前后的一句短话，不要强制写父母或具体脸部。`,170);
-                  await saveArchive({bowDone:true,bowLine:t,directorStage:"bow"});
+                const step=Number(state.archive?.bowStep||0);
+                const names=["一拜天地","二拜见证","夫妻对拜"];
+                await withGenerateButton(el,`${partnerDisplayName()} 正与你行 ${names[step]||"此拜"}`,async()=>{
+                  const task=step===0
+                    ? `拜堂第一礼“一拜天地”。写${partnerDisplayName()}与 USER 同时郑重行礼的现场，加入堂前宾客短暂安静、衣袂与烛火等细节。`
+                    : step===1
+                    ? `拜堂第二礼“二拜见证”。这里向今日在堂前见证婚礼的亲友与重要之人致礼，不强制父母或具体家庭关系。写一段克制的现场剧情。`
+                    : `拜堂第三礼“夫妻对拜”。写${partnerDisplayName()}与 USER 相向而拜，强调彼此平等、认真选择对方；可以有一处极短的停顿或一句符合人设的话。`;
+                  const t=await weddingSceneText(task,170);
+                  await saveArchive({
+                    bowStep:Math.min(3,step+1),
+                    bowDone:step+1>=3,
+                    bowLine:t,
+                    directorStage:"bow"
+                  });
                 });
                 return renderBowV7();
               }
@@ -2783,7 +2957,7 @@
               if(action==="to-banquet-v5"){await saveArchive({directorStage:"banquetentry"});return renderBanquetEntryV8()}
               if(action==="banquet-entry-look-v8"||action==="banquet-entry-char-v8"){
                 const task=action==="banquet-entry-look-v8"
-                  ? `现代中式婚礼正礼结束，新人正进入宴席。写一段入宴现场：宾客重新说笑、朋友举杯、摄影师或工作人员招呼新人入席。焦点仍在两位新人。`
+                  ? `现代中式婚礼正礼结束，新人正进入宴席。写一段入宴现场：宾客重新说笑、朋友举杯、司礼退场后满堂渐渐热闹起来。焦点仍在两位新人。`
                   : `现代中式婚礼正礼结束，${partnerDisplayName()}刚进入宴席就被朋友或同事围住。写一段他如何以自己原本性格应付起哄、敬酒或玩笑，同时下意识留意 USER 在哪里。`;
                 await withGenerateButton(el,"宴席重新热闹起来",async()=>{
                   const t=await weddingSceneText(task,180);
@@ -2814,7 +2988,7 @@
               if(action==="banquet-end-v8"){await saveArchive({directorStage:"banquetend"});return renderBanquetEndV8()}
               if(action==="banquet-goodbye-v8"||action==="banquet-wait-char-v8"){
                 const task=action==="banquet-goodbye-v8"
-                  ? `现代中式婚礼已经接近散席。写新人和最后一拨亲友、朋友告别的现场，工作人员也开始收拾。不要夸张煽情。`
+                  ? `现代中式婚礼已经接近散席。写新人和最后一拨亲友、朋友告别的现场，席间人声渐少、杯盏渐空。不要夸张煽情。`
                   : `喜宴将散，${partnerDisplayName()}还被朋友或宾客留住说最后几句话，USER在一旁等他。写一段他从人群里重新走回她身边的现场剧情。`;
                 await withGenerateButton(el,"宴席正在慢慢散去",async()=>{
                   const t=await weddingSceneText(task,180);
