@@ -3,7 +3,7 @@
 
   const PLUGIN_ID = "hejingshu";
   const APP_ID = "hejingshu-home";
-  const VERSION = "0.2.0";
+  const VERSION = "0.3.0";
 
   const GOLD = "#D6B56A";
   const DEEP_RED = "#6F0D14";
@@ -195,6 +195,13 @@
 @keyframes hjFlash{0%{opacity:0;transform:translate(-50%,-50%) scale(.2);box-shadow:0 0 0 0 rgba(246,221,160,.5)}40%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(5);box-shadow:0 0 24px 18px rgba(246,221,160,0)}}
 @keyframes hjCertIn{to{opacity:1;transform:none}}
 
+
+.hj-card-title{font-size:16px;color:#efd69a;letter-spacing:.12em;margin-bottom:6px}
+.hj-wedding-day-badge{display:inline-flex;padding:6px 10px;border:1px solid rgba(214,181,106,.35);border-radius:999px;color:#e0c98e;font-size:10px;letter-spacing:.18em}
+.hj-hall-lines{position:absolute;inset:0;pointer-events:none;background:
+ radial-gradient(circle at 50% -10%,rgba(232,198,113,.08),transparent 36%),
+ linear-gradient(90deg,transparent 49.8%,rgba(224,190,105,.10) 50%,transparent 50.2%)}
+
 </style>`;
   }
 
@@ -211,9 +218,12 @@
         const state = {
           page: "home",
           user: null,
+          users: [],
           chars: [],
+          selectedUser: null,
           selectedChar: null,
           archive: null,
+          archives: [],
           loading: false
         };
 
@@ -242,11 +252,20 @@
         }
 
         async function loadBase() {
-          try { state.user = await roche.persona.getActiveUserPersona(); } catch (_) {}
+          try { state.users = (await roche.persona.getUserPersonas()) || []; } catch (_) { state.users = []; }
+          try { state.user = await roche.persona.getActiveUserPersona(); } catch (_) { state.user = null; }
+          state.selectedUser = state.user || state.users[0] || null;
           try { state.chars = (await roche.character.list()) || []; } catch (_) { state.chars = []; }
-          state.archive = await safeGet(storage, "currentMarriage", null);
-          if (state.archive?.partnerId) {
+
+          state.archives = await safeGet(storage, "marriageArchives", []);
+          const currentId = await safeGet(storage, "currentMarriageId", "");
+          state.archive = state.archives.find(x => x.id === currentId) || null;
+
+          if (state.archive) {
+            state.selectedUser = state.users.find(u => u.id === state.archive.userPersonaId) || state.selectedUser;
             state.selectedChar = state.chars.find(c => c.id === state.archive.partnerId) || null;
+          } else {
+            state.selectedChar = null;
           }
         }
 
@@ -255,7 +274,8 @@
           return c ? (c.name || c.handle || "良人") : "良人";
         }
         function userName() {
-          return state.user ? (state.user.name || state.user.handle || "卿") : "卿";
+          const u = state.selectedUser || state.user;
+          return u ? (u.name || u.handle || "卿") : "卿";
         }
 
         function topbar(title, backTarget) {
@@ -268,11 +288,45 @@
         }
 
         function renderHome() {
-          if (state.archive?.completedAt) {
-            renderAnniversary();
-            return;
-          }
           const dust = Array.from({length:18},(_,i)=>`<i style="left:${(i*37)%100}%;top:${-(i*23)%120}px;animation-delay:${(i%7)*.42}s"></i>`).join("");
+          if (state.archive?.completedAt) {
+            view.innerHTML = `
+              <div class="hj-home">
+                <div class="hj-opening-scroll">
+                  <div class="hj-gold-dust">${dust}</div>
+                  <div class="hj-opening">
+                    <div class="hj-knot">囍</div>
+                    <div class="hj-title">合卺书</div>
+                    <div class="hj-sub">此书既成 · 岁岁为证</div>
+                    <div class="hj-rule"></div>
+                    <div class="hj-quote">${esc(state.archive.userMarriageName||userName())} · ${esc(state.archive.partnerMarriageName||partnerName())}<br>合卺第 ${daysSince(state.archive.completedAt)} 日</div>
+                    <button class="hj-primary" data-action="resume-married">入岁岁帖</button>
+                    <div style="height:10px"></div>
+                    <button class="hj-secondary" data-action="new-marriage">另启新婚</button>
+                  </div>
+                </div>
+              </div>`;
+            bind(); return;
+          }
+          if (state.archive && state.archive.partnerId) {
+            view.innerHTML = `
+              <div class="hj-home">
+                <div class="hj-opening-scroll">
+                  <div class="hj-gold-dust">${dust}</div>
+                  <div class="hj-opening">
+                    <div class="hj-knot">囍</div>
+                    <div class="hj-title">合卺书</div>
+                    <div class="hj-sub">大婚未竟 · 嘉礼待续</div>
+                    <div class="hj-rule"></div>
+                    <div class="hj-quote">已有一场尚未完成的婚礼。<br>可继续，也可另启新婚。</div>
+                    <button class="hj-primary" data-action="resume-wedding">续礼</button>
+                    <div style="height:10px"></div>
+                    <button class="hj-secondary" data-action="new-marriage">另启新婚</button>
+                  </div>
+                </div>
+              </div>`;
+            bind(); return;
+          }
           view.innerHTML = `
             <div class="hj-home">
               <div class="hj-opening-scroll">
@@ -284,7 +338,7 @@
                   <div class="hj-sub">嘉礼初成 · 两姓婚盟</div>
                   <div class="hj-rule"></div>
                   <div class="hj-quote">谨以白头之约，书向鸿笺。<br>好将红叶之盟，载明鸳谱。</div>
-                  <button class="hj-primary" data-action="start">启书</button>
+                  <button class="hj-primary" data-action="new-marriage">启书</button>
                 </div>
               </div>
             </div>`;
@@ -292,6 +346,15 @@
         }
 
         function renderChoose() {
+          const userCards = state.users.map(u => {
+            const selected = state.selectedUser?.id === u.id;
+            return `<button class="hj-person ${selected?"selected":""}" data-action="select-user" data-id="${esc(u.id)}">
+              ${u.avatar ? `<img class="hj-avatar" src="${esc(u.avatar)}">` : `<div class="hj-avatar-fallback">${esc((u.name||u.handle||"我").slice(0,1))}</div>`}
+              <div class="hj-person-txt"><div class="hj-person-name">${esc(u.handle || u.name || "USER")}</div>
+              <div class="hj-person-bio">${esc(u.bio || "此次婚礼使用的人设")}</div></div>
+            </button>`;
+          }).join("");
+
           const cards = state.chars.map(c => {
             const selected = state.selectedChar?.id === c.id;
             return `
@@ -305,13 +368,16 @@
           }).join("");
 
           view.innerHTML = `
-            ${topbar("择良人","home")}
+            ${topbar("择新人","home")}
             <div class="hj-page">
               <div class="hj-stepper"><i class="hj-dot on"></i><i class="hj-dot"></i><i class="hj-dot"></i><i class="hj-dot"></i><i class="hj-dot"></i></div>
-              <div class="hj-section-title">一 · 择良人</div>
-              <div class="hj-section-desc">嘉礼之始，先定心之所归。请选择与你共书此卷之人。</div>
+              <div class="hj-section-title">一 · 定新人</div>
+              <div class="hj-section-desc">这场婚礼会锁定一份独立人设快照。以后切换其他人设，也不会污染这场婚礼。</div>
+              <div class="hj-label">我的人设</div>
+              <div class="hj-grid">${userCards || `<div class="hj-card">未读取到 USER 人设。</div>`}</div>
+              <div class="hj-label" style="margin-top:20px">新郎</div>
               <div class="hj-grid">${cards || `<div class="hj-card">未读取到角色。</div>`}</div>
-              <div class="hj-actions"><button class="hj-primary" data-action="to-names" ${state.selectedChar?"":"disabled"}>定此良缘</button></div>
+              <div class="hj-actions"><button class="hj-primary" data-action="to-names" ${state.selectedChar&&state.selectedUser?"":"disabled"}>定此良缘</button></div>
             </div>`;
           bind();
         }
@@ -372,7 +438,7 @@
         async function genAI(kind) {
           if (!state.selectedChar) return "";
           const a = state.archive || {};
-          const userPersona = state.user?.persona || state.user?.bio || "";
+          const userPersona = state.selectedUser?.persona || state.selectedUser?.bio || "";
           const charPersona = state.selectedChar?.persona || state.selectedChar?.bio || "";
           let memoryText = "";
           try {
@@ -400,6 +466,179 @@
           return String(result?.text || "").trim();
         }
 
+
+
+        async function weddingAwareText(task, maxChars=180) {
+          if (!state.selectedChar || !state.selectedUser) return "";
+          const a = state.archive || {};
+          const userPersona = state.selectedUser?.persona || state.selectedUser?.bio || "";
+          const charPersona = state.selectedChar?.persona || state.selectedChar?.bio || "";
+          let memoryText = "";
+          try {
+            const cid = state.selectedChar.conversationId;
+            if (cid) {
+              const mem = await roche.memory.getLongTerm({conversationId:cid,limit:80});
+              const core = mem?.core?.summary || mem?.core?.text || "";
+              const facts = (mem?.facts||[]).slice(0,30).map(x=>x.summaryText||x.action||x.text||"").filter(Boolean).join("\n");
+              memoryText = [core,facts].filter(Boolean).join("\n");
+            }
+          } catch(_) {}
+          const result = await roche.ai.chat({
+            messages:[
+              {role:"system",content:`你正在参与一场正式、郑重的中式婚礼。你扮演新郎本人，不是旁白。你必须保持原本人设，不要突然变成模板化古风男主；但你清楚知道今天是你正式迎娶 USER 的日子，这件事对你非常重要。可以保留平时的幽默、嘴硬、散漫等性格，但进入正礼、婚誓、落印等庄重环节时要自然收敛，表现出尊重、认真和珍惜。不要戏谑婚礼本身，不要把它当游戏。`},
+              {role:"system",content:`USER人设：\n${userPersona}\n\n新郎人设：\n${charPersona}\n\n可参考的既有关系记忆：\n${memoryText||"无"}\n\n当前婚礼：${a.userMarriageName||userName()} 与 ${a.partnerMarriageName||partnerName()} 的正式婚礼。`},
+              {role:"user",content:task + `\n请控制在${maxChars}字以内。`}
+            ],temperature:.72
+          });
+          return String(result?.text||"").trim();
+        }
+
+        function renderPreWedding() {
+          const a = state.archive || {};
+          view.innerHTML = `
+            ${topbar("婚前一日","names")}
+            <div class="hj-page">
+              <div class="hj-section-title">二 · 婚期将至</div>
+              <div class="hj-section-desc">真正的大婚，从“明日要成婚”开始。</div>
+              <div class="hj-card">
+                <div class="hj-scene-kicker">婚 前 心 绪</div>
+                <div class="hj-section-title" style="font-size:18px">迎亲之前</div>
+                <div id="hj-prethought" style="font-size:13px;line-height:2;color:#ead7ad">${esc(a.preThought || "喜服已备，婚书在案。天尚未亮，他就知道——今日，他要去娶你。")}</div>
+                <div class="hj-actions"><button class="hj-secondary" data-action="gen-prethought">让他想一想</button></div>
+              </div>
+              <div class="hj-card" style="margin-top:14px">
+                <div class="hj-label">婚堂</div>
+                <div class="hj-grid">
+                  <button class="hj-person ${a.hall==="朱门华堂"?"selected":""}" data-action="pick-hall" data-value="朱门华堂"><div class="hj-person-name">朱门华堂</div></button>
+                  <button class="hj-person ${a.hall==="庭院花烛"?"selected":""}" data-action="pick-hall" data-value="庭院花烛"><div class="hj-person-name">庭院花烛</div></button>
+                  <button class="hj-person ${a.hall==="青庐古礼"?"selected":""}" data-action="pick-hall" data-value="青庐古礼"><div class="hj-person-name">青庐古礼</div></button>
+                  <button class="hj-person ${a.hall==="春日园林"?"selected":""}" data-action="pick-hall" data-value="春日园林"><div class="hj-person-name">春日园林</div></button>
+                </div>
+              </div>
+              <div class="hj-actions"><button class="hj-primary" data-action="start-pickup">至吉时 · 开亲迎</button></div>
+            </div>`;
+          bind();
+        }
+
+        function renderPickup(stage="叩门") {
+          const a = state.archive || {};
+          if(stage==="叩门"){
+            view.innerHTML = `
+              <div class="hj-scene">
+                ${topbar("亲迎 · 叩门","prewedding")}
+                <div class="hj-scene-main"><div class="hj-scene-card">
+                  <div class="hj-scene-kicker">吉 时 已 至</div>
+                  <div class="hj-scene-title">新郎叩门</div>
+                  <div class="hj-scene-copy">朱门未启，门内笑语正盛。今日第一关，不问礼数，只问真心。</div>
+                  <div class="hj-card" style="text-align:left">
+                    <div class="hj-label">堵门问答</div>
+                    <div style="font-size:14px;line-height:1.8">“第一次真正意识到，你非她不可，是什么时候？”</div>
+                    <div id="hj-door-answer" style="margin-top:12px;font-size:13px;line-height:1.9;color:#ead7ad">${esc(a.doorAnswer||"")}</div>
+                    <div class="hj-actions"><button class="hj-secondary" data-action="answer-door">让新郎回答</button></div>
+                  </div>
+                </div></div>
+                <div class="hj-scene-bottom"><button class="hj-primary" data-action="pickup-next" data-next="寻鞋">门开一线</button></div>
+              </div>`;
+          } else if(stage==="寻鞋"){
+            const found = a.shoeFound;
+            view.innerHTML = `
+              <div class="hj-scene">
+                ${topbar("亲迎 · 寻鞋","prewedding")}
+                <div class="hj-scene-main"><div class="hj-scene-card">
+                  <div class="hj-scene-kicker">堵 门 小 戏</div>
+                  <div class="hj-scene-title">寻婚鞋</div>
+                  <div class="hj-scene-copy">屏风、妆奁、箱笼、花架——婚鞋只藏在一处。</div>
+                  <div class="hj-grid">
+                    ${["屏风后","妆奁下","箱笼中","花架旁"].map((x,i)=>`<button class="hj-person" data-action="find-shoe" data-value="${x}"><div class="hj-person-name">${x}</div></button>`).join("")}
+                  </div>
+                  <div class="hj-toastline">${found ? `找到了。婚鞋就藏在「${esc(found)}」。` : "再找不到，吉时可要被耽误了。"}</div>
+                </div></div>
+                <div class="hj-scene-bottom"><button class="hj-primary" data-action="pickup-next" data-next="却扇">迎卿相见</button></div>
+              </div>`;
+          } else {
+            renderProcessScene("却扇");
+          }
+          bind();
+        }
+
+        function renderExitBride() {
+          view.innerHTML = `
+            <div class="hj-scene">
+              ${topbar("出阁礼","却扇")}
+              <div class="hj-scene-main"><div class="hj-scene-card">
+                <div class="hj-scene-kicker">辞 旧 迎 新</div>
+                <div class="hj-scene-title">出阁</div>
+                <div class="hj-scene-copy">今日出此门，非为离别，乃往新岁。门外有人来迎你，门内仍留旧日灯火。</div>
+                <div class="hj-thread-stage tied"><div class="hj-thread left"></div><div class="hj-thread right"></div><div class="hj-thread-knot">门</div></div>
+              </div></div>
+              <div class="hj-scene-bottom"><button class="hj-primary" data-action="to-hall">出阁入轿</button></div>
+            </div>`;
+          bind();
+        }
+
+        function renderHall() {
+          const a = state.archive || {};
+          view.innerHTML = `
+            <div class="hj-scene">
+              ${topbar("华堂","出阁")}
+              <div class="hj-curtain"></div>
+              <div class="hj-lantern-wrap"><div class="hj-lantern"></div><div class="hj-lantern" style="animation-delay:.7s"></div></div>
+              <div class="hj-scene-main"><div class="hj-scene-card">
+                <div class="hj-scene-kicker">赞 礼 官 唱 礼</div>
+                <div class="hj-scene-title">${esc(a.hall||"朱门华堂")}</div>
+                <div class="hj-scene-copy">宾朋已至，花烛已明。新人将入堂，正礼自此开始。</div>
+                <div class="hj-card">
+                  <div style="font-size:13px;line-height:2;color:#ead7ad">「良辰既至——请新人入堂。」</div>
+                </div>
+              </div></div>
+              <div class="hj-scene-bottom"><button class="hj-primary" data-action="formal-next" data-next="沃盥">入正礼</button></div>
+            </div>`;
+          bind();
+        }
+
+        function renderFormal(stage) {
+          const copy = {
+            "沃盥":["沃盥","净手洁心","盥洗去尘，非为形式，只为以清净之心入此一礼。"],
+            "拜礼":["拜礼","天地为证","可不拘泥繁礼，但这一拜，是向今日郑重行礼。"],
+            "合卺":["合卺","卺分为二 · 合而为一","两盏相合，从此同甘共苦。"],
+            "结发":["结发","两缕同心","结发为盟，不在发丝，而在此后愿意同行。"]
+          }[stage] || ["正礼","嘉礼",""];
+          view.innerHTML = `
+            <div class="hj-scene">
+              ${topbar("正礼 · "+stage,"hall")}
+              <div class="hj-scene-main"><div class="hj-scene-card">
+                <div class="hj-scene-kicker">赞 礼 官</div>
+                <div class="hj-scene-title">${copy[0]}</div>
+                <div class="hj-scene-copy">${copy[2]}</div>
+                ${stage==="合卺" ? `<div class="hj-cups" id="hj-cups"><div class="hj-cup left"></div><div class="hj-cup right"></div><div class="hj-flash"></div></div><button class="hj-secondary" data-action="join-cups">共饮合卺</button>` :
+                  stage==="结发" ? `<div class="hj-thread-stage" id="hj-thread-stage"><div class="hj-thread left"></div><div class="hj-thread right"></div><div class="hj-thread-knot">∞</div></div><button class="hj-secondary" data-action="tie-thread">结发</button>` :
+                  `<div class="hj-knot" style="margin-top:20px">${stage==="沃盥"?"水":"礼"}</div>`}
+              </div></div>
+              <div class="hj-scene-bottom"><button class="hj-primary" data-action="formal-next" data-next="${stage==="沃盥"?"拜礼":stage==="拜礼"?"合卺":stage==="合卺"?"结发":"婚誓"}">${stage==="结发"?"各陈一诺":"礼成 · 下一仪"}</button></div>
+            </div>`;
+          bind();
+        }
+
+        function renderBanquet() {
+          view.innerHTML = `
+            <div class="hj-scene">
+              ${topbar("喜宴","certificate")}
+              <div class="hj-lantern-wrap"><div class="hj-lantern"></div><div class="hj-lantern" style="animation-delay:.6s"></div></div>
+              <div class="hj-scene-main"><div class="hj-scene-card">
+                <div class="hj-scene-kicker">嘉 礼 已 成 · 宾 朋 共 贺</div>
+                <div class="hj-scene-title">开席</div>
+                <div class="hj-scene-copy">正礼结束以后，才该热闹起来。敬酒、喜糖、合影、宾客留言，都属于这一日。</div>
+                <div class="hj-grid">
+                  <div class="hj-card">敬酒</div><div class="hj-card">喜糖</div>
+                  <div class="hj-card">合影</div><div class="hj-card">留言簿</div>
+                </div>
+                <div id="hj-banquet-line" class="hj-toastline" style="margin-top:18px"></div>
+                <button class="hj-secondary" data-action="banquet-moment">让他在喜宴里说一句</button>
+              </div></div>
+              <div class="hj-scene-bottom"><button class="hj-primary" data-action="finish-day">宴散 · 嘉礼已毕</button></div>
+            </div>`;
+          bind();
+        }
 
         function renderProcessScene(kind) {
           const a = state.archive || {};
@@ -559,9 +798,40 @@
         }
 
         async function saveArchive(patch) {
-          const base = state.archive || { id: uid(), createdAt: Date.now() };
-          state.archive = Object.assign({}, base, patch);
-          await storage.set("currentMarriage", state.archive);
+          if (!state.archive) {
+            state.archive = {
+              id: uid(),
+              createdAt: Date.now(),
+              status: "planning"
+            };
+          }
+          state.archive = Object.assign({}, state.archive, patch);
+          const list = (await safeGet(storage, "marriageArchives", [])).filter(x => x.id !== state.archive.id);
+          list.push(state.archive);
+          state.archives = list;
+          await storage.set("marriageArchives", list);
+          await storage.set("currentMarriageId", state.archive.id);
+        }
+
+        async function createNewMarriage() {
+          state.archive = null;
+          state.selectedChar = null;
+          state.selectedUser = state.user || state.users[0] || null;
+          const fresh = {
+            id: uid(),
+            createdAt: Date.now(),
+            status: "planning",
+            rituals: {},
+            scenes: {},
+            blessing: "",
+            vowUser: "",
+            vowPartner: "",
+            latestNote: "",
+            completedAt: null
+          };
+          state.archive = fresh;
+          await saveArchive({});
+          renderChoose();
         }
 
 
@@ -588,10 +858,10 @@
             raf = requestAnimationFrame(tick);
             timer = setTimeout(async () => {
               done = true;
-              await saveArchive({completedAt:Date.now()});
+              await saveArchive({status:"ceremony-complete"});
               try { navigator.vibrate?.(45); } catch(_){}
               toast("嘉礼成 · 此书既成，岁岁为证");
-              setTimeout(renderAnniversary, 650);
+              setTimeout(renderBanquet, 650);
             },1200);
           };
           el.addEventListener("pointerdown", begin);
@@ -609,8 +879,18 @@
                 if (t==="home") return renderHome();
                 if (t==="choose") return renderChoose();
                 if (t==="names") return renderNames();
-                if (t==="rituals") return renderRituals();
+                if (t==="rituals") return renderPreWedding();
                 if (t==="vows") return renderVows();
+              }
+              if (action === "new-marriage") return createNewMarriage();
+              if (action === "resume-married") return renderAnniversary();
+              if (action === "resume-wedding") {
+                if (state.archive?.status === "wedding-day") return renderPreWedding();
+                return renderNames();
+              }
+              if (action === "select-user") {
+                state.selectedUser = state.users.find(u=>u.id===el.dataset.id) || state.selectedUser;
+                return renderChoose();
               }
               if (action === "start") return renderChoose();
               if (action === "select-char") {
@@ -627,13 +907,14 @@
                   bio: state.selectedChar.bio || "",
                   persona: state.selectedChar.persona || ""
                 }, userSnapshot: {
-                  id: state.user?.id || "",
-                  name: state.user?.name || "",
-                  handle: state.user?.handle || "",
-                  avatar: state.user?.avatar || "",
-                  bio: state.user?.bio || "",
-                  persona: state.user?.persona || ""
-                }});
+                  id: state.selectedUser?.id || "",
+                  name: state.selectedUser?.name || "",
+                  handle: state.selectedUser?.handle || "",
+                  avatar: state.selectedUser?.avatar || "",
+                  bio: state.selectedUser?.bio || "",
+                  persona: state.selectedUser?.persona || ""
+                },
+                userPersonaId: state.selectedUser?.id || ""});
                 return renderNames();
               }
               if (action === "save-names") {
@@ -651,6 +932,65 @@
                 await saveArchive({rituals});
                 toast(rituals[id] ? `${id}礼成` : `${id}已撤`);
                 return renderRituals();
+              }
+              if (action === "pick-hall") {
+                await saveArchive({hall:el.dataset.value,status:"planning"});
+                return renderPreWedding();
+              }
+              if (action === "gen-prethought") {
+                if (state.loading) return;
+                state.loading = true; el.disabled = true; el.textContent = "他正在想……";
+                try {
+                  const t = await weddingAwareText("现在是婚礼当天清晨，你已经穿好婚服，马上要出门接亲。写出你此刻真实的婚前心绪。不要故作深情，要像你本人。",180);
+                  await saveArchive({preThought:t});
+                } catch(_) { toast("生成失败，请检查当前 AI 配置"); }
+                state.loading = false; return renderPreWedding();
+              }
+              if (action === "start-pickup") {
+                await saveArchive({status:"wedding-day"});
+                return renderPickup("叩门");
+              }
+              if (action === "answer-door") {
+                if (state.loading) return;
+                state.loading = true; el.disabled = true; el.textContent = "回答中……";
+                try {
+                  const t = await weddingAwareText("你正在接亲堵门。门里的人问：第一次真正意识到，你非她不可，是什么时候？请直接以新郎口吻回答。可以引用你们真实记忆，但不要编造没有依据的重大经历。",150);
+                  await saveArchive({doorAnswer:t});
+                } catch(_) { toast("生成失败"); }
+                state.loading = false; return renderPickup("叩门");
+              }
+              if (action === "pickup-next") return renderPickup(el.dataset.next);
+              if (action === "find-shoe") {
+                const target = state.archive?.shoeTarget || ["屏风后","妆奁下","箱笼中","花架旁"][Math.floor(Math.random()*4)];
+                if (!state.archive?.shoeTarget) await saveArchive({shoeTarget:target});
+                if (el.dataset.value === target) {
+                  await saveArchive({shoeFound:target});
+                  toast("找到了婚鞋");
+                } else {
+                  toast("这里没有，再找找");
+                }
+                return renderPickup("寻鞋");
+              }
+              if (action === "to-hall") return renderHall();
+              if (action === "formal-next") {
+                const n = el.dataset.next;
+                if (n === "婚誓") return renderVows();
+                return renderFormal(n);
+              }
+              if (action === "banquet-moment") {
+                if (state.loading) return;
+                state.loading = true; el.disabled = true; el.textContent = "他正在应酬……";
+                try {
+                  const t = await weddingAwareText("正礼已经结束，现在是喜宴。宾客在起哄敬酒。请以你的原本人设说一句此刻会对 USER 说的话。可以轻松一点，但仍然记得今天是你们的婚礼。",120);
+                  const line = view.querySelector("#hj-banquet-line"); if(line) line.textContent = t;
+                  await saveArchive({banquetLine:t});
+                } catch(_) { toast("生成失败"); }
+                state.loading = false; el.disabled = false; el.textContent = "让他在喜宴里说一句";
+              }
+              if (action === "finish-day") {
+                await saveArchive({completedAt:Date.now(),status:"married"});
+                toast("嘉礼已毕 · 而余生方始");
+                setTimeout(renderAnniversary,700);
               }
               if (action === "generate-blessing") {
                 if (state.loading) return;
@@ -689,7 +1029,10 @@
                 await saveArchive({rituals});
               }
               if (action === "to-vows") return renderVows();
-              if (action === "scene-next") return renderProcessScene(el.dataset.next);
+              if (action === "scene-next") {
+                if (el.dataset.next === "合卺") return renderExitBride();
+                return renderProcessScene(el.dataset.next);
+              }
               if (action === "ai-vows") {
                 if (state.loading) return;
                 state.loading = true; el.disabled = true; el.textContent = "代拟中…";
@@ -717,9 +1060,9 @@
               if (action === "complete") {
                 const ok = await roche.ui.confirm({title:"落印成书",message:"婚书一经落印，本季便进入婚后纪年。仍可在后续版本中继续扩展岁岁帖。"});
                 if (!ok) return;
-                await saveArchive({completedAt: Date.now()});
+                await saveArchive({status:"ceremony-complete"});
                 toast("嘉礼成");
-                setTimeout(renderAnniversary, 500);
+                setTimeout(renderBanquet, 500);
               }
               if (action === "certificate") return renderCertificate(false);
               if (action === "save-note") {
