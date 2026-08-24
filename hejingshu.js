@@ -3,7 +3,7 @@
 
   const PLUGIN_ID = "hejingshu";
   const APP_ID = "hejingshu-home";
-  const VERSION = "0.4.0";
+  const VERSION = "0.5.0";
 
   const GOLD = "#D6B56A";
   const DEEP_RED = "#6F0D14";
@@ -37,6 +37,14 @@
     departureHands: ASSET_BASE + "departure-hands.webp",
     morningAfter: ASSET_BASE + "morning-after.webp",
     keepsakes: ASSET_BASE + "keepsakes.webp"
+  };
+
+
+  const AUDIO_BASE = "https://raw.githubusercontent.com/linyin8945/hejingshu/main/audio/";
+  const WEDDING_AUDIO = {
+    procession: AUDIO_BASE + "procession.mp3",
+    ceremony: AUDIO_BASE + "ceremony.mp3",
+    afterglow: AUDIO_BASE + "afterglow.mp3"
   };
 
   function sceneStyle(key, position = "center") {
@@ -535,6 +543,128 @@
   to{transform:scale(1.055)}
 }
 
+
+/* =========================================================
+   v0.5 · 嘉礼重构 / 可触碰的婚礼电影
+   ========================================================= */
+.hj-v5-cover{
+  height:100%;position:relative;overflow:hidden;background:#4a060a;
+}
+.hj-v5-cover::before{
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(180deg,rgba(25,1,3,.20),rgba(25,1,3,.18) 42%,rgba(25,1,3,.78)),
+    url("https://raw.githubusercontent.com/linyin8945/hejingshu/main/assets/scenes/marriage-book.webp") center/cover no-repeat;
+  transform:scale(1.035);animation:hjPhotoBreath 11s ease-in-out infinite alternate;
+}
+.hj-v5-cover-content{
+  position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;
+  align-items:center;padding:0 28px calc(72px + env(safe-area-inset-bottom));text-align:center;
+}
+.hj-v5-cover-seal{font-size:13px;letter-spacing:.5em;color:#f0d38c;margin-right:-.5em}
+.hj-v5-cover-title{font-size:48px;letter-spacing:.25em;margin:12px -.25em 8px 0;color:#f3d685;
+  text-shadow:0 8px 30px rgba(0,0,0,.45)}
+.hj-v5-cover-sub{font-size:12px;letter-spacing:.24em;color:#eadab1;margin-bottom:28px}
+.hj-v5-cover .hj-primary{min-width:180px;background:rgba(201,163,80,.94)}
+.hj-v5-top{
+  position:absolute;left:0;right:0;top:0;z-index:20;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 14px;background:linear-gradient(180deg,rgba(25,1,3,.62),transparent);
+}
+.hj-music-btn{width:38px;height:38px;border-radius:50%;border:1px solid rgba(237,209,139,.32);
+  background:rgba(56,5,8,.32);color:#f0d995;font-size:16px}
+.hj-film{
+  height:100%;position:relative;overflow:hidden;background:#3a0407;color:#f4e7c5;
+}
+.hj-film-bg{position:absolute;inset:0;background-image:var(--hj-scene-image);background-size:cover;
+  background-position:var(--hj-scene-pos,center);transition:transform 8s ease;transform:scale(1.025)}
+.hj-film.enter .hj-film-bg{transform:scale(1.065)}
+.hj-film-shade{position:absolute;inset:0;background:
+  linear-gradient(180deg,rgba(20,1,3,.24),transparent 28%,transparent 55%,rgba(24,1,3,.78) 100%),
+  linear-gradient(90deg,rgba(20,1,3,.14),transparent 30%,transparent 70%,rgba(20,1,3,.14))}
+.hj-film-content{position:absolute;left:0;right:0;bottom:0;z-index:5;padding:24px 22px calc(26px + env(safe-area-inset-bottom))}
+.hj-film-kicker{font-size:10px;letter-spacing:.42em;color:#e9cb83;margin-right:-.42em;margin-bottom:9px}
+.hj-film-title{font-size:31px;letter-spacing:.12em;color:#f3d78d;text-shadow:0 3px 18px rgba(0,0,0,.42)}
+.hj-film-line{font-size:14px;line-height:1.95;color:#f3e5c7;text-shadow:0 2px 12px rgba(0,0,0,.52);margin-top:10px;max-width:92%}
+.hj-film-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.hj-film-actions .hj-primary,.hj-film-actions .hj-secondary{padding:11px 18px}
+.hj-caption{
+  margin-top:13px;padding:0 2px;font-size:12px;line-height:1.8;color:#e7d4aa;
+}
+.hj-ritual-help{
+  position:absolute;right:18px;top:70px;z-index:12;border:1px solid rgba(234,207,139,.36);
+  background:rgba(56,5,8,.38);color:#efd894;border-radius:999px;padding:7px 10px;font-size:11px;
+}
+.hj-help-sheet{position:absolute;left:18px;right:18px;bottom:22px;z-index:30;padding:18px;border-radius:18px;
+  border:1px solid rgba(234,207,139,.34);background:rgba(48,4,7,.94);backdrop-filter:blur(14px);
+  box-shadow:0 18px 60px rgba(0,0,0,.38)}
+.hj-help-sheet h3{margin:0 0 8px;color:#f1d48a;font-size:18px}
+.hj-help-sheet p{margin:0;color:#eadbb9;font-size:12px;line-height:1.9}
+.hj-touch-object{margin:22px auto 0;display:flex;align-items:center;justify-content:center;position:relative}
+.hj-water-bowl{width:172px;height:64px;border-radius:50%;border:2px solid rgba(225,191,106,.75);
+  background:radial-gradient(ellipse at center,rgba(186,218,224,.58),rgba(68,91,103,.44) 48%,rgba(80,27,22,.86) 53%,#a67b42 68%,#3f1513 72%);
+  box-shadow:0 12px 30px rgba(0,0,0,.32),inset 0 0 20px rgba(255,255,255,.15);cursor:pointer}
+.hj-water-bowl.ripple::after{content:"";position:absolute;width:92px;height:24px;border:1px solid rgba(235,249,250,.7);
+  border-radius:50%;animation:hjRipple 1.2s ease-out}
+@keyframes hjRipple{from{transform:scale(.25);opacity:1}to{transform:scale(1.7);opacity:0}}
+.hj-food-tray{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:min(330px,88vw)}
+.hj-food{border:1px solid rgba(229,197,114,.4);border-radius:14px;background:rgba(70,10,10,.58);
+  padding:15px 8px;color:#efdba8;font-size:12px;min-height:72px}
+.hj-food.selected{border-color:#f0d080;box-shadow:0 0 0 2px rgba(240,208,128,.12) inset}
+.hj-fan-touch{width:210px;height:210px;border-radius:50%;border:3px solid rgba(221,190,110,.78);
+  background:radial-gradient(circle at 50% 42%,#f5e7bd,#ddc78e 65%,#a98143);display:flex;
+  align-items:center;justify-content:center;color:#8d6736;font-size:38px;transform:translateX(0) rotate(-4deg);
+  transition:transform 1.1s cubic-bezier(.2,.8,.2,1),opacity .9s}
+.hj-fan-touch.peek{transform:translateX(54px) rotate(8deg)}
+.hj-fan-touch.open{transform:translateX(220px) rotate(14deg);opacity:.05}
+.hj-hand-touch{width:116px;height:54px;border-radius:50px 50px 16px 50px;background:linear-gradient(180deg,#f0d2b8,#d6aa90);
+  transform:rotate(-7deg);box-shadow:0 12px 30px rgba(0,0,0,.25);position:relative}
+.hj-hand-touch::after{content:"";position:absolute;right:-30px;top:6px;width:58px;height:42px;border-radius:50%;
+  background:linear-gradient(180deg,#f0d2b8,#d6aa90)}
+.hj-cup-pair{display:flex;justify-content:center;gap:42px;margin-top:20px}
+.hj-cup-btn{width:76px;height:82px;border-radius:9px 9px 32px 32px;border:2px solid #d6b15e;
+  background:linear-gradient(180deg,#a11820,#6e0c12);color:#e6c56f;display:flex;align-items:center;justify-content:center}
+.hj-cup-btn.lift{transform:translateY(-16px);transition:.7s}
+.hj-thread-interact{width:min(330px,88vw);height:90px;position:relative;margin:18px auto 0}
+.hj-thread-interact::before,.hj-thread-interact::after{content:"";position:absolute;top:42px;width:45%;height:2px;background:#c65044}
+.hj-thread-interact::before{left:2%;transform:rotate(9deg)}.hj-thread-interact::after{right:2%;transform:rotate(-9deg)}
+.hj-thread-knot-v5{position:absolute;left:50%;top:25px;transform:translateX(-50%);width:44px;height:44px;border-radius:50%;
+  border:1px solid rgba(230,190,110,.65);display:flex;align-items:center;justify-content:center;color:#e2c377;background:#711016}
+.hj-vow-book{
+  position:absolute;inset:0;background:
+    linear-gradient(180deg,rgba(50,4,7,.17),rgba(50,4,7,.32)),
+    url("https://raw.githubusercontent.com/linyin8945/hejingshu/main/assets/scenes/marriage-book.webp") center/cover no-repeat;
+}
+.hj-vow-panel{position:absolute;left:18px;right:18px;bottom:22px;max-height:68%;overflow:auto;z-index:4;
+  padding:18px;border-radius:20px;background:rgba(73,7,10,.70);border:1px solid rgba(236,205,128,.34);
+  backdrop-filter:blur(11px)}
+.hj-vow-write{font-size:13px;line-height:2;color:#f1dfb8;white-space:pre-wrap}
+.hj-book-live{
+  min-height:100%;padding:74px 26px 130px;position:relative;overflow:auto;
+  background:
+    linear-gradient(180deg,rgba(86,8,12,.14),rgba(86,8,12,.18)),
+    url("https://raw.githubusercontent.com/linyin8945/hejingshu/main/assets/scenes/marriage-book.webp") center/cover fixed no-repeat;
+}
+.hj-book-paper{
+  max-width:520px;margin:0 auto;padding:28px 22px 30px;background:rgba(121,15,21,.78);
+  border:1px solid rgba(240,206,123,.55);box-shadow:0 20px 60px rgba(0,0,0,.26),inset 0 0 0 6px rgba(245,213,130,.05);
+  backdrop-filter:blur(5px)
+}
+.hj-book-paper .names{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:20px 0;text-align:center}
+.hj-book-paper .name{font-size:24px;color:#f2d581}.hj-book-paper .role{font-size:10px;color:#d8bf8b;letter-spacing:.2em}
+.hj-book-vow{padding:13px 0;border-top:1px solid rgba(239,205,127,.26);font-size:12px;line-height:1.9;color:#f0dfb8}
+.hj-double-seals{display:flex;justify-content:center;gap:48px;margin:24px 0 8px}
+.hj-person-seal{width:62px;height:62px;border:2px solid #d36b5d;color:#d97466;display:flex;align-items:center;justify-content:center;
+  font-size:11px;line-height:1.25;transform:rotate(-5deg);opacity:.22;transition:.5s}
+.hj-person-seal.on{opacity:1;box-shadow:0 0 0 3px rgba(211,107,93,.10) inset}
+.hj-hold{width:88px;height:88px;border-radius:50%;border:1px solid rgba(235,203,124,.45);display:flex;align-items:center;justify-content:center;
+  color:#efd58b;margin:16px auto 0;user-select:none;touch-action:none;position:relative}
+.hj-hold::before{content:"";position:absolute;inset:7px;border-radius:50%;border:2px solid rgba(235,203,124,.2)}
+.hj-hold.holding::before{animation:hjHold 1.4s linear forwards}
+@keyframes hjHold{to{border-color:#efd07d;box-shadow:0 0 0 8px rgba(239,208,125,.12)}}
+.hj-ai-line{margin-top:14px;font-size:13px;line-height:1.9;color:#f0dfbb}
+.hj-slow-reveal{animation:hjFade 1.2s ease both}
+
 </style>`;
   }
 
@@ -582,6 +712,104 @@
           clearTimeout(toastTimer);
           toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1600);
           try { roche.ui.toast(msg); } catch (_) {}
+        }
+
+
+        const music = {
+          audio: null,
+          current: "",
+          muted: false,
+          targetVolume: .46,
+          fadeTimer: null,
+          ensure() {
+            if (!this.audio) {
+              this.audio = new Audio();
+              this.audio.preload = "auto";
+              this.audio.loop = true;
+              this.audio.volume = 0;
+              this.audio.playsInline = true;
+            }
+            return this.audio;
+          },
+          async play(key, volume=.46, restart=false) {
+            const url = WEDDING_AUDIO[key];
+            if (!url || this.muted) return;
+            const a = this.ensure();
+            this.targetVolume = volume;
+            if (this.current === key && !restart) {
+              if (a.paused) { try { await a.play(); } catch(_){} }
+              return this.fadeTo(volume, 900);
+            }
+            await this.fadeTo(0, 600);
+            this.current = key;
+            a.src = url;
+            a.currentTime = 0;
+            try { await a.play(); } catch(_) {}
+            this.fadeTo(volume, 1500);
+          },
+          fadeTo(v, ms=800) {
+            const a = this.ensure();
+            clearInterval(this.fadeTimer);
+            const from = a.volume, start = performance.now();
+            this.fadeTimer = setInterval(()=>{
+              const p = Math.min(1,(performance.now()-start)/ms);
+              a.volume = Math.max(0, Math.min(1, from + (v-from)*p));
+              if (p>=1) clearInterval(this.fadeTimer);
+            },40);
+          },
+          duck(on=true) { this.fadeTo(on ? .15 : this.targetVolume, on ? 450 : 900); },
+          toggle() {
+            this.muted = !this.muted;
+            const a = this.ensure();
+            if (this.muted) { a.pause(); a.volume=0; }
+            else if (this.current) { a.play().catch(()=>{}); this.fadeTo(this.targetVolume,700); }
+            updateMusicButtons();
+          },
+          stop() {
+            clearInterval(this.fadeTimer);
+            if (this.audio) { this.audio.pause(); this.audio.src=""; }
+            this.current="";
+          }
+        };
+
+        function updateMusicButtons() {
+          root.querySelectorAll("[data-action='music-toggle']").forEach(b=>{
+            b.textContent = music.muted ? "♩" : "♫";
+            b.setAttribute("aria-label", music.muted ? "开启音乐" : "关闭音乐");
+          });
+        }
+
+        function musicTop(title, back="home") {
+          return `<div class="hj-v5-top">
+            <button class="hj-iconbtn" data-action="back" data-target="${esc(back)}">‹</button>
+            <div class="hj-top-title">${esc(title)}</div>
+            <div><button class="hj-music-btn" data-action="music-toggle">${music.muted?"♩":"♫"}</button>
+            <button class="hj-iconbtn" data-action="close">×</button></div>
+          </div>`;
+        }
+
+        function filmShell({asset,title,kicker="",line="",actions="",help="",back="home",position="center",extra=""}) {
+          return `<div class="hj-film enter" ${sceneStyle(asset,position)}>
+            <div class="hj-film-bg"></div><div class="hj-film-shade"></div>
+            ${musicTop(title,back)}
+            ${help ? `<button class="hj-ritual-help" data-action="show-help" data-title="${esc(title)}" data-help="${esc(help)}">礼？</button>`:""}
+            ${extra}
+            <div class="hj-film-content">
+              ${kicker?`<div class="hj-film-kicker">${esc(kicker)}</div>`:""}
+              <div class="hj-film-title">${esc(title)}</div>
+              ${line?`<div class="hj-film-line">${line}</div>`:""}
+              ${actions?`<div class="hj-film-actions">${actions}</div>`:""}
+            </div>
+          </div>`;
+        }
+
+        function showHelp(title, text) {
+          root.querySelector(".hj-help-sheet")?.remove();
+          const s = document.createElement("div");
+          s.className="hj-help-sheet";
+          s.innerHTML=`<h3>${esc(title)}</h3><p>${esc(text)}</p><div class="hj-actions"><button class="hj-secondary" data-action="close-help">知道了</button></div>`;
+          root.querySelector(".hj-shell").appendChild(s);
+          bind();
         }
 
         async function loadBase() {
@@ -1175,6 +1403,373 @@
           bind();
         }
 
+
+        /* =========================
+           v0.5 Director Flow
+           ========================= */
+
+        function renderHomeV5() {
+          if (state.archive?.completedAt) {
+            music.play("afterglow",.34);
+            view.innerHTML = `<div class="hj-v5-cover">
+              ${musicTop("合卺书")}
+              <div class="hj-v5-cover-content">
+                <div class="hj-v5-cover-seal">岁 岁 为 证</div>
+                <div class="hj-v5-cover-title">合卺书</div>
+                <div class="hj-v5-cover-sub">${esc(state.archive.userMarriageName||userName())} · ${esc(state.archive.partnerMarriageName||partnerName())}　成婚第 ${daysSince(state.archive.completedAt)} 日</div>
+                <button class="hj-primary" data-action="resume-married">打开岁岁帖</button>
+                <div style="height:10px"></div>
+                <button class="hj-secondary" data-action="new-marriage">另启一卷</button>
+              </div>
+            </div>`;
+            bind();return;
+          }
+          music.play("ceremony",.24);
+          view.innerHTML = `<div class="hj-v5-cover">
+            ${musicTop("合卺书")}
+            <div class="hj-v5-cover-content">
+              <div class="hj-v5-cover-seal">两 姓 缔 约</div>
+              <div class="hj-v5-cover-title">合卺书</div>
+              <div class="hj-v5-cover-sub">${state.archive?.partnerId ? "大婚未竟 · 嘉礼待续" : "吉期既定 · 嘉礼将启"}</div>
+              ${state.archive?.partnerId
+                ? `<button class="hj-primary" data-action="resume-wedding">续礼</button><div style="height:10px"></div><button class="hj-secondary" data-action="new-marriage">另启新婚</button>`
+                : `<button class="hj-primary" data-action="new-marriage">启书</button>`}
+            </div>
+          </div>`;
+          bind();
+        }
+
+        function renderChooseV5() {
+          const userCards = state.users.map(u=>{
+            const on=state.selectedUser?.id===u.id;
+            return `<button class="hj-person ${on?"selected":""}" data-action="select-user" data-id="${esc(u.id)}">
+              ${u.avatar?`<img class="hj-avatar" src="${esc(u.avatar)}">`:`<div class="hj-avatar-fallback">${esc((u.name||u.handle||"我").slice(0,1))}</div>`}
+              <div class="hj-person-txt"><div class="hj-person-name">${esc(u.handle||u.name||"USER")}</div><div class="hj-person-bio">${esc(u.bio||"此次婚礼使用的人设")}</div></div>
+            </button>`;
+          }).join("");
+          const charCards = state.chars.map(c=>{
+            const on=state.selectedChar?.id===c.id;
+            return `<button class="hj-person ${on?"selected":""}" data-action="select-char" data-id="${esc(c.id)}">
+              ${c.avatar?`<img class="hj-avatar" src="${esc(c.avatar)}">`:`<div class="hj-avatar-fallback">${esc((c.name||c.handle||"良").slice(0,1))}</div>`}
+              <div class="hj-person-txt"><div class="hj-person-name">${esc(c.handle||c.name||"未命名")}</div><div class="hj-person-bio">${esc(c.bio||c.description||"今日，他将以新郎身份与你共行嘉礼")}</div></div>
+            </button>`;
+          }).join("");
+          view.innerHTML = `${musicTop("择新人","home")}<div class="hj-page" style="padding-top:72px">
+            <div class="hj-section-title">今日，与谁成婚？</div>
+            <div class="hj-section-desc">选择后会锁定独立人设快照。婚礼中的他仍是他自己，只是清楚知道——今天，他在娶你。</div>
+            <div class="hj-label">我</div><div class="hj-grid">${userCards||`<div class="hj-card">未读取到 USER 人设。</div>`}</div>
+            <div class="hj-label" style="margin-top:20px">新郎</div><div class="hj-grid">${charCards||`<div class="hj-card">未读取到角色。</div>`}</div>
+            ${state.selectedChar?`<div class="hj-card" style="margin-top:18px;text-align:center"><div class="hj-sub">今日，他将以新郎身份与你共行嘉礼</div><div class="hj-section-title" style="font-size:22px">${esc(partnerName())}</div></div>`:""}
+            <div class="hj-actions"><button class="hj-primary" data-action="to-names" ${state.selectedChar&&state.selectedUser?"":"disabled"}>就是他</button></div>
+          </div>`;
+          bind();
+        }
+
+        function renderNamesV5() {
+          const a=state.archive||{};
+          view.innerHTML=`${musicTop("婚书初立","choose")}<div class="hj-page" style="padding-top:72px">
+            <div class="hj-section-title">婚书初立</div>
+            <div class="hj-section-desc">此刻婚书仍是空的。婚誓与双印，要等你们在正礼中亲自留下。</div>
+            <div class="hj-card">
+              <label class="hj-label">卿之婚名</label><input id="hj-user-name" class="hj-input" value="${esc(a.userMarriageName||userName())}">
+              <label class="hj-label">良人婚名</label><input id="hj-partner-name" class="hj-input" value="${esc(a.partnerMarriageName||partnerName())}">
+              <label class="hj-label">婚期</label><input id="hj-date" class="hj-input" type="date" value="${esc(a.weddingDate||new Date().toISOString().slice(0,10))}">
+            </div>
+            <div class="hj-actions"><button class="hj-primary" data-action="save-names-v5">立婚书</button></div>
+          </div>`;
+          bind();
+        }
+
+        function renderPreWeddingV5() {
+          music.play("afterglow",.28);
+          const a=state.archive||{};
+          view.innerHTML = filmShell({
+            asset:"bridePrep",title:"大婚前夜",kicker:"吉 期 将 至",
+            line:`夜色渐深。明日，你便要与 ${esc(a.partnerMarriageName||partnerName())} 成婚。`,
+            actions:`<button class="hj-secondary" data-action="gen-letter">${a.preLetter?"重读他的婚前笺":"等一封婚前笺"}</button>
+                     <button class="hj-primary" data-action="start-pickup-v5">待到吉时</button>`,
+            back:"names",
+            extra:a.preLetter?`<div style="position:absolute;left:24px;right:24px;top:22%;z-index:7;padding:17px;border:1px solid rgba(239,207,129,.3);border-radius:16px;background:rgba(61,6,9,.68);backdrop-filter:blur(9px);font-size:13px;line-height:2;color:#f0deb8"><div class="hj-film-kicker">婚 前 笺</div>${esc(a.preLetter)}</div>`:""
+          });
+          bind();
+        }
+
+        function renderProcessionV5() {
+          music.play("procession",.5);
+          view.innerHTML=filmShell({
+            asset:"procession",title:"他来了",kicker:"亲 迎",
+            line:"长街之外，迎亲仪仗渐近。红绸随风而动，脚步声一点点靠近。",
+            actions:`<button class="hj-primary" data-action="to-door-v5">听见叩门</button>`,
+            back:"prewedding",position:"center"
+          });
+          bind();
+        }
+
+        function renderDoorV5() {
+          const a=state.archive||{};
+          view.innerHTML=filmShell({
+            asset:"pickupDoor",title:"朱门叩问",kicker:"亲 迎",
+            line:"门没有立刻打开。今日第一问，不问礼数，只问真心。",
+            help:"亲迎，是婚礼中由新郎亲自迎娶新娘的礼仪。这里的叩门互动是《合卺书》的现代化婚俗设计，用来让新郎真正表达“为什么今日来娶你”。",
+            actions:`<button class="hj-secondary" data-action="door-silent">不应他</button>
+                     <button class="hj-secondary" data-action="door-question">隔门问他</button>
+                     <button class="hj-primary" data-action="door-heart">让他拿出诚意</button>`,
+            back:"procession",
+            extra:a.doorAnswer?`<div style="position:absolute;left:24px;right:24px;top:24%;z-index:7;padding:16px;border-radius:16px;background:rgba(55,5,8,.70);border:1px solid rgba(238,207,129,.28);font-size:13px;line-height:1.95;color:#f2dfb9"><b>${esc(a.partnerMarriageName||partnerName())}</b>：${esc(a.doorAnswer)}</div>`:""
+          });
+          bind();
+        }
+
+        async function renderFanV5(peek=0) {
+          music.play("procession",.38);
+          const a=state.archive||{};
+          view.innerHTML=filmShell({
+            asset:"veilLift",title:"见君",kicker:"出 阁 · 却 扇",
+            line:peek===0?"他已经进来了。团扇仍在眼前，你只听得到他的脚步。":peek===1?"扇缘移开一点。你先看见他的衣袖，再看见他停在原地。":"团扇移开。今日这一眼，被郑重地留在婚礼里。",
+            help:"“却扇”并非所有时代婚礼都统一存在的固定步骤，《合卺书》将它作为古典婚俗意象保留：新人相见，扇移而见。",
+            actions:peek<2?`<button class="hj-primary" data-action="fan-touch" data-peek="${peek+1}">${peek===0?"轻触团扇":"再移开一点"}</button>`:`<button class="hj-primary" data-action="to-hand-v5">随他出阁</button>`,
+            back:"door",
+            extra:`<div class="hj-touch-object" style="position:absolute;left:50%;top:26%;z-index:7;transform:translateX(-50%)"><div class="hj-fan-touch ${peek===1?"peek":peek>=2?"open":""}">却</div></div>
+              ${a.firstLook?`<div style="position:absolute;left:24px;right:24px;top:60%;z-index:7;text-align:center;font-size:13px;line-height:1.8;color:#f1dfb8;text-shadow:0 2px 12px #000">${esc(a.firstLook)}</div>`:""}`
+          });
+          bind();
+        }
+
+        function renderHandV5() {
+          view.innerHTML=filmShell({
+            asset:"departureHands",title:"执手出阁",kicker:"出 阁",
+            line:"门外有人来迎你。今日出此门，不为离别，是从此与他一同往前。",
+            actions:`<button class="hj-primary" data-action="take-hand-v5">牵住他</button>`,
+            back:"fan"
+          });
+          bind();
+        }
+
+        function renderSedanV5() {
+          music.play("procession",.34);
+          view.innerHTML=filmShell({
+            asset:"sedanJourney",title:"花轿归程",kicker:"归 门",
+            line:"轿帘轻晃。长街上的声音渐渐远去。这里没有任务，你可以只坐一会儿。",
+            actions:`<button class="hj-secondary" data-action="linger-sedan">再坐一会儿</button><button class="hj-primary" data-action="arrive-v5">轿停了</button>`,
+            back:"hand"
+          });
+          bind();
+        }
+
+        function renderArrivalV5() {
+          view.innerHTML=filmShell({
+            asset:"sedanArrival",title:"迎卿下轿",kicker:"归 门",
+            line:"轿帘掀起。喜堂已经在前方，他先把手伸了过来。",
+            actions:`<button class="hj-primary" data-action="to-hall-v5">把手给他</button>`,
+            back:"sedan"
+          });
+          bind();
+        }
+
+        function renderHallV5() {
+          music.play("ceremony",.42);
+          view.innerHTML=filmShell({
+            asset:"weddingHallEntry",title:"入华堂",kicker:"正 婚",
+            line:"宾朋已至，花烛已明。音乐渐收，只余堂前一声清磬。司礼唱：正婚礼始。",
+            actions:`<button class="hj-primary" data-action="to-wash-v5">入正婚礼</button>`,
+            back:"arrival"
+          });
+          bind();
+        }
+
+        function renderWashV5(done=false) {
+          music.play("ceremony",.36);
+          view.innerHTML=filmShell({
+            asset:"weddingHallEntry",title:"沃盥",kicker:"第 一 礼",
+            line:done?"水纹渐静。你们都已净手，正礼由此真正开始。":"司礼：沃盥——新人净手。",
+            help:"沃盥：新人入席前以清水净手。取去尘净心、郑重入礼之意。这里不把它当作“点一下完成”，而是让你亲手触水。",
+            actions:done?`<button class="hj-primary" data-action="to-tonglao-v5">同席而食</button>`:`<button class="hj-secondary" data-action="wash-water">触碰水面</button>`,
+            back:"hall",
+            extra:`<div class="hj-touch-object" style="position:absolute;left:50%;top:35%;z-index:7;transform:translateX(-50%)"><div id="hj-water" class="hj-water-bowl ${done?"ripple":""}"></div></div>`
+          });
+          bind();
+        }
+
+        function renderTonglaoV5(selected="") {
+          music.play("ceremony",.36);
+          const foods=["枣栗","同牢肉","黍饭"];
+          view.innerHTML=filmShell({
+            asset:"banquetToast",title:"同牢",kicker:"第 二 礼",
+            line:selected?`你选了「${esc(selected)}」。从这一箸开始，是第一次以夫妻身份同席。`:"司礼：同牢——共席而食。",
+            help:"同牢：新人同席共食，象征从今日起同居一室、同食一席。它在传统婚礼礼制中与合卺前后相承。",
+            actions:selected?`<button class="hj-primary" data-action="to-hejin-v5">执卺</button>`:"",
+            back:"wash",
+            extra:`<div class="hj-touch-object" style="position:absolute;left:50%;top:34%;z-index:7;transform:translateX(-50%)"><div class="hj-food-tray">${
+              foods.map(x=>`<button class="hj-food ${selected===x?"selected":""}" data-action="choose-food" data-food="${x}">${x}</button>`).join("")
+            }</div></div>`
+          });
+          bind();
+        }
+
+        function renderHejinV5(lifted=false) {
+          music.play("ceremony",.32);
+          view.innerHTML=filmShell({
+            asset:"hejinCups",title:"合卺",kicker:"第 三 礼",
+            line:lifted?"你执起自己的卺。他也端起另一只。两盏将在这一刻相合。":"司礼：合卺——新人各执其一。",
+            help:"卺分为二，新人各执一半共饮，再合而为一。取从此甘苦同尝、夫妻一体之意。",
+            actions:lifted?`<button class="hj-primary" data-action="drink-hejin">与他同时饮下</button>`:`<button class="hj-primary" data-action="lift-cup">执起自己的卺</button>`,
+            back:"tonglao",
+            extra:`<div class="hj-touch-object" style="position:absolute;left:50%;top:32%;z-index:7;transform:translateX(-50%)"><div class="hj-cup-pair"><div class="hj-cup-btn ${lifted?"lift":""}">卺</div><div class="hj-cup-btn ${lifted?"lift":""}">卺</div></div></div>`
+          });
+          bind();
+        }
+
+        function renderHairV5() {
+          music.play("ceremony",.28);
+          view.innerHTML=filmShell({
+            asset:"hairKnot",title:"结发",kicker:"第 四 礼",
+            line:"各取一缕青丝，以红线同系。它不会随着页面结束消失，而会被收入你们的婚藏。",
+            help:"结发在后世成为夫妻关系的重要象征。《合卺书》把两缕青丝与红线做成可永久保存的婚礼信物。",
+            actions:`<button class="hj-primary" data-action="tie-hair-v5">系青丝</button>`,
+            back:"hejin",
+            extra:`<div class="hj-touch-object" style="position:absolute;left:50%;top:34%;z-index:7;transform:translateX(-50%)"><div class="hj-thread-interact"><div class="hj-thread-knot-v5">结</div></div></div>`
+          });
+          bind();
+        }
+
+        async function renderVowsV5() {
+          music.play("ceremony",.24); music.duck(true);
+          const a=state.archive||{};
+          if(!a.vowPartner && !state.loading){
+            state.loading=true;
+            try{
+              const t=await weddingAwareText("现在正婚礼已经行至婚誓。请以你本人原本的语言习惯，对你的新娘说出一段真正属于你的婚誓。不要套用古风誓词，不要突然变成另一个人；可以克制、嘴硬、寡言或温柔，但必须认真。你要明确知道：你今天是在娶她，并愿意承担婚姻中的陪伴、尊重与责任。",240);
+              await saveArchive({vowPartner:t});
+            }catch(_){}
+            state.loading=false;
+          }
+          const b=state.archive||a;
+          view.innerHTML=`<div class="hj-film"><div class="hj-vow-book"></div>${musicTop("婚誓","hair")}
+            <div class="hj-vow-panel">
+              <div class="hj-film-kicker">请 二 位 · 各 陈 一 诺</div>
+              <div class="hj-section-title" style="font-size:20px">${esc(b.partnerMarriageName||partnerName())}</div>
+              <div class="hj-vow-write">${esc(b.vowPartner||"他仍在整理想说的话……")}</div>
+              <div class="hj-rule" style="width:100%;animation:none;margin:18px 0"></div>
+              <div class="hj-section-title" style="font-size:20px">轮到你</div>
+              <textarea id="hj-vow-user-v5" class="hj-textarea" placeholder="亲笔写下你的婚誓……">${esc(b.vowUser||"")}</textarea>
+              <div class="hj-actions"><button class="hj-secondary" data-action="draft-user-vow">依我的人设拟一份</button><button class="hj-primary" data-action="save-vows-v5">写下此诺</button></div>
+            </div></div>`;
+          bind();
+        }
+
+        function renderBookV5(stage="user") {
+          music.duck(true);
+          const a=state.archive||{};
+          const userOn=stage!=="user";
+          const partnerOn=stage==="done";
+          view.innerHTML=`<div class="hj-book-live">${musicTop("婚书 · 双印","vows")}
+            <div class="hj-book-paper">
+              <div class="hj-cert-top">两 姓 缔 约 · 此 诺 为 凭</div>
+              <div class="hj-cert-title" style="font-size:34px">婚书</div>
+              <div class="names"><div><div class="role">婚书其一</div><div class="name">${esc(a.userMarriageName||userName())}</div></div>
+              <div><div class="role">婚书其二</div><div class="name">${esc(a.partnerMarriageName||partnerName())}</div></div></div>
+              <div class="hj-book-vow">「${esc(a.vowUser||"")||"愿此后朝暮相守，岁岁同心。"}」</div>
+              <div class="hj-book-vow">「${esc(a.vowPartner||"")||"愿与你共看人间灯火，共守寻常岁月。"}」</div>
+              <div class="hj-double-seals"><div class="hj-person-seal ${userOn?"on":""}">${esc((a.userMarriageName||userName()).slice(0,2))}<br>之印</div>
+              <div class="hj-person-seal ${partnerOn?"on":""}">${esc((a.partnerMarriageName||partnerName()).slice(0,2))}<br>之印</div></div>
+              ${stage==="user"?`<div class="hj-section-desc" style="text-align:center">长按落下你的印。</div><div class="hj-hold" id="hj-user-hold">长按<br>落印</div>`:
+                stage==="partner"?`<div class="hj-section-desc" style="text-align:center">你的印已落下。现在，轮到他。</div><button class="hj-primary" style="display:block;margin:14px auto 0" data-action="partner-seal">看他落印</button>`:
+                `<div class="hj-section-desc" style="text-align:center">两印俱全。婚书至此真正完成。</div><button class="hj-primary" style="display:block;margin:14px auto 0" data-action="ceremony-complete-v5">收书 · 待礼成</button>`}
+              <div class="hj-cert-foot">婚期：${esc(a.weddingDate?fmtDate(new Date(a.weddingDate).getTime()):fmtDate())}</div>
+            </div></div>`;
+          bind(); if(stage==="user") bindUserSealHold();
+        }
+
+        function bindUserSealHold() {
+          const el=view.querySelector("#hj-user-hold"); if(!el) return;
+          let timer=null;
+          const stop=()=>{clearTimeout(timer);el.classList.remove("holding")};
+          el.addEventListener("pointerdown",ev=>{
+            ev.preventDefault();el.classList.add("holding");
+            timer=setTimeout(async()=>{
+              try{navigator.vibrate?.(50)}catch(_){}
+              await saveArchive({userSealAt:Date.now()});
+              renderBookV5("partner");
+            },1400);
+          });
+          ["pointerup","pointercancel","pointerleave"].forEach(x=>el.addEventListener(x,stop));
+        }
+
+        async function renderCeremonyCompleteV5() {
+          music.duck(false); music.play("ceremony",.48);
+          const a=state.archive||{};
+          if(!a.afterCeremonyLine && !state.loading){
+            state.loading=true;
+            try{
+              const t=await weddingAwareText("正婚礼已经结束，婚书双印俱全。你第一次真正意识到，她现在已经成为你的妻子。不要写旁白，不要模板情话，只说此刻你本人最自然会对她说的一两句话。",140);
+              await saveArchive({afterCeremonyLine:t,status:"ceremony-complete"});
+            }catch(_){}
+            state.loading=false;
+          }
+          const b=state.archive||a;
+          view.innerHTML=filmShell({
+            asset:"ceremonyComplete",title:"礼成",kicker:"嘉 礼 既 成",
+            line:"两姓既合，婚书既成。司礼唱：嘉礼——礼成。",
+            actions:`<button class="hj-primary" data-action="to-banquet-v5">赴喜宴</button>`,
+            back:"book",
+            extra:b.afterCeremonyLine?`<div style="position:absolute;left:24px;right:24px;top:27%;z-index:7;padding:15px;border-radius:16px;background:rgba(54,5,8,.58);backdrop-filter:blur(8px);font-size:13px;line-height:1.9;color:#f1dfb8">${esc(b.partnerMarriageName||partnerName())}：${esc(b.afterCeremonyLine)}</div>`:""
+          });
+          bind();
+        }
+
+        function renderBanquetV5() {
+          music.play("procession",.28);
+          const a=state.archive||{};
+          view.innerHTML=filmShell({
+            asset:"banquetHall",title:"喜宴",kicker:"礼 成 之 后",
+            line:"正礼已经结束。这里不再有必须完成的步骤，你们终于可以从仪式里松下来。",
+            actions:`<button class="hj-secondary" data-action="banquet-talk-v5">偷看他</button><button class="hj-secondary" data-action="banquet-toast-v5">与他敬一杯</button><button class="hj-primary" data-action="to-night-v5">与他离席</button>`,
+            back:"complete",
+            extra:a.banquetLine?`<div style="position:absolute;left:24px;right:24px;top:28%;z-index:7;padding:15px;border-radius:16px;background:rgba(54,5,8,.62);font-size:13px;line-height:1.9;color:#f1dfb8">${esc(a.banquetLine)}</div>`:""
+          });
+          bind();
+        }
+
+        function renderNightV5() {
+          music.play("afterglow",.30);
+          view.innerHTML=filmShell({
+            asset:"bridalNightSeated",title:"花烛",kicker:"只 剩 你 们",
+            line:"门合上，外面的喜宴声一点点远去。婚礼结束以后，终于只剩你们两个人。",
+            actions:`<button class="hj-secondary" data-action="night-question">问他：今天什么时候最紧张？</button><button class="hj-secondary" data-action="night-look">问他：看到我时在想什么？</button><button class="hj-primary" data-action="sleep-v5">歇下</button>`,
+            back:"banquet"
+          });
+          bind();
+        }
+
+        function renderMorningV5() {
+          music.play("afterglow",.24);
+          view.innerHTML=filmShell({
+            asset:"morningAfter",title:"新婚第一日",kicker:"花 烛 余 温",
+            line:"昨日嘉礼已成。今日，是你们成婚后的第一日。",
+            actions:`<button class="hj-primary" data-action="finish-wedding-v5">打开岁岁帖</button>`,
+            back:"home"
+          });
+          bind();
+        }
+
+        function renderAnniversaryV5() {
+          music.play("afterglow",.20);
+          const a=state.archive||{},d=daysSince(a.completedAt);
+          view.innerHTML=`${musicTop("岁岁帖","home")}<div class="hj-page" style="padding-top:72px">
+            <div class="hj-anniv"><div class="hj-sub">自合卺之日起</div><div class="hj-count">${d}<small>日</small></div>
+            <div class="hj-section-desc">婚礼不是通关。它从这一日开始，被保存为你们共同的婚姻档案。</div></div>
+            <div class="hj-mini-cert" data-action="certificate-v5"><div style="text-align:center;color:#E8CB7A;font-size:22px;letter-spacing:.22em">合卺书</div>
+              <div style="display:flex;justify-content:center;gap:18px;margin-top:10px;color:#E8D9B7;font-size:13px"><span>${esc(a.userMarriageName||userName())}</span><span>·</span><span>${esc(a.partnerMarriageName||partnerName())}</span></div>
+              <div style="text-align:center;color:#BFAE90;font-size:11px;margin-top:8px">${esc(a.weddingDate||"")}</div></div>
+            <div class="hj-keepsake-card"><img src="${WEDDING_ASSETS.keepsakes}" alt=""><div class="hj-keepsake-title">婚礼珍藏 · 婚书 / 结发 / 双印</div></div>
+            <div class="hj-card" style="margin-top:14px"><div class="hj-section-title" style="font-size:17px;margin-top:0">今日留一句</div>
+              <textarea id="hj-note" class="hj-textarea" placeholder="写给今天的你们……">${esc(a.latestNote||"")}</textarea>
+              <div class="hj-actions"><button class="hj-secondary" data-action="save-note-v5">存入岁岁帖</button></div>
+            </div>
+          </div>`;
+          bind();
+        }
+
         async function saveArchive(patch) {
           if (!state.archive) {
             state.archive = {
@@ -1205,11 +1800,20 @@
             vowUser: "",
             vowPartner: "",
             latestNote: "",
-            completedAt: null
+            completedAt: null,
+            directorStage: "choose",
+            preLetter: "",
+            doorAnswer: "",
+            firstLook: "",
+            tonglaoFood: "",
+            hejinDone: false,
+            hairKeepsake: false,
+            userSealAt: null,
+            partnerSealAt: null
           };
           state.archive = fresh;
           await saveArchive({});
-          renderChoose();
+          renderChooseV5();
         }
 
 
@@ -1247,227 +1851,134 @@
         }
 
         function bind() {
-          view.querySelectorAll("[data-action]").forEach(el => {
-            el.addEventListener("click", async () => {
-              const action = el.dataset.action;
-              if (action === "close") return roche.ui.closeApp();
-              if (action === "home") return renderHome();
-              if (action === "back") {
-                const t = el.dataset.target;
-                if (t==="home") return renderHome();
-                if (t==="choose") return renderChoose();
-                if (t==="names") return renderNames();
-                if (t==="rituals") return renderPreWedding();
-                if (t==="vows") return renderVows();
+          view.querySelectorAll("[data-action]").forEach(el=>{
+            if(el.__hjBound) return; el.__hjBound=true;
+            el.addEventListener("click",async()=>{
+              const action=el.dataset.action;
+              if(action==="close") { music.stop(); return roche.ui.closeApp(); }
+              if(action==="music-toggle") return music.toggle();
+              if(action==="close-help") return el.closest(".hj-help-sheet")?.remove();
+              if(action==="show-help") return showHelp(el.dataset.title||"此礼",el.dataset.help||"");
+              if(action==="home") return renderHomeV5();
+              if(action==="back"){
+                const t=el.dataset.target;
+                const map={home:renderHomeV5,choose:renderChooseV5,names:renderNamesV5,prewedding:renderPreWeddingV5,procession:renderProcessionV5,door:()=>renderDoorV5(),fan:()=>renderFanV5(2),hand:renderHandV5,sedan:renderSedanV5,arrival:renderArrivalV5,hall:renderHallV5,wash:()=>renderWashV5(true),tonglao:()=>renderTonglaoV5(state.archive?.tonglaoFood||""),hejin:()=>renderHejinV5(true),hair:renderHairV5,vows:renderVowsV5,book:()=>renderBookV5("done"),complete:renderCeremonyCompleteV5,banquet:renderBanquetV5};
+                return (map[t]||renderHomeV5)();
               }
-              if (action === "new-marriage") return createNewMarriage();
-              if (action === "resume-married") return renderAnniversary();
-              if (action === "resume-wedding") {
-                if (state.archive?.status === "wedding-day") return renderPreWedding();
-                return renderNames();
+              if(action==="new-marriage") return createNewMarriage();
+              if(action==="resume-married") return renderAnniversaryV5();
+              if(action==="resume-wedding"){
+                const s=state.archive?.directorStage||"prewedding";
+                const map={prewedding:renderPreWeddingV5,procession:renderProcessionV5,door:renderDoorV5,fan:()=>renderFanV5(0),hand:renderHandV5,sedan:renderSedanV5,arrival:renderArrivalV5,hall:renderHallV5,wash:()=>renderWashV5(false),tonglao:()=>renderTonglaoV5(),hejin:()=>renderHejinV5(false),hair:renderHairV5,vows:renderVowsV5,book:()=>renderBookV5(state.archive?.partnerSealAt?"done":state.archive?.userSealAt?"partner":"user"),complete:renderCeremonyCompleteV5,banquet:renderBanquetV5,night:renderNightV5,morning:renderMorningV5};
+                return (map[s]||renderPreWeddingV5)();
               }
-              if (action === "select-user") {
-                const scroller = view.querySelector(".hj-page");
-                const y = scroller?.scrollTop || 0;
-                state.selectedUser = state.users.find(u=>u.id===el.dataset.id) || state.selectedUser;
-                renderChoose();
-                requestAnimationFrame(()=>{ const s=view.querySelector(".hj-page"); if(s) s.scrollTop=y; });
-                return;
+              if(action==="select-user"){
+                const y=view.querySelector(".hj-page")?.scrollTop||0;
+                state.selectedUser=state.users.find(u=>u.id===el.dataset.id)||state.selectedUser;
+                renderChooseV5();requestAnimationFrame(()=>{const s=view.querySelector(".hj-page");if(s)s.scrollTop=y});return;
               }
-              if (action === "start") return renderChoose();
-              if (action === "select-char") {
-                const scroller = view.querySelector(".hj-page");
-                const y = scroller?.scrollTop || 0;
-                state.selectedChar = state.chars.find(c=>c.id===el.dataset.id) || null;
-                renderChoose();
-                requestAnimationFrame(()=>{ const s=view.querySelector(".hj-page"); if(s) s.scrollTop=y; });
-                return;
+              if(action==="select-char"){
+                const y=view.querySelector(".hj-page")?.scrollTop||0;
+                state.selectedChar=state.chars.find(c=>c.id===el.dataset.id)||null;
+                renderChooseV5();requestAnimationFrame(()=>{const s=view.querySelector(".hj-page");if(s)s.scrollTop=y});return;
               }
-              if (action === "to-names") {
-                if (!state.selectedChar) return toast("请先择一良人");
-                await saveArchive({ partnerId: state.selectedChar.id, partnerSnapshot: {
-                  id: state.selectedChar.id,
-                  name: state.selectedChar.name || "",
-                  handle: state.selectedChar.handle || "",
-                  avatar: state.selectedChar.avatar || "",
-                  bio: state.selectedChar.bio || "",
-                  persona: state.selectedChar.persona || ""
-                }, userSnapshot: {
-                  id: state.selectedUser?.id || "",
-                  name: state.selectedUser?.name || "",
-                  handle: state.selectedUser?.handle || "",
-                  avatar: state.selectedUser?.avatar || "",
-                  bio: state.selectedUser?.bio || "",
-                  persona: state.selectedUser?.persona || ""
-                },
-                userPersonaId: state.selectedUser?.id || ""});
-                return renderNames();
-              }
-              if (action === "save-names") {
+              if(action==="to-names"){
+                if(!state.selectedChar||!state.selectedUser) return toast("请先定下两位新人");
                 await saveArchive({
-                  userMarriageName: view.querySelector("#hj-user-name").value.trim() || userName(),
-                  partnerMarriageName: view.querySelector("#hj-partner-name").value.trim() || partnerName(),
-                  weddingDate: view.querySelector("#hj-date").value
+                  partnerId:state.selectedChar.id,userPersonaId:state.selectedUser.id,
+                  partnerSnapshot:{id:state.selectedChar.id,name:state.selectedChar.name||"",handle:state.selectedChar.handle||"",avatar:state.selectedChar.avatar||"",bio:state.selectedChar.bio||"",persona:state.selectedChar.persona||""},
+                  userSnapshot:{id:state.selectedUser.id,name:state.selectedUser.name||"",handle:state.selectedUser.handle||"",avatar:state.selectedUser.avatar||"",bio:state.selectedUser.bio||"",persona:state.selectedUser.persona||""},
+                  status:"planning",directorStage:"names"
                 });
-                return renderRituals();
+                return renderNamesV5();
               }
-              if (action === "ritual") {
-                const id = el.dataset.id;
-                const rituals = Object.assign({}, state.archive?.rituals || {});
-                rituals[id] = !rituals[id];
-                await saveArchive({rituals});
-                toast(rituals[id] ? `${id}礼成` : `${id}已撤`);
-                return renderRituals();
+              if(action==="save-names-v5"){
+                await saveArchive({userMarriageName:view.querySelector("#hj-user-name").value.trim()||userName(),partnerMarriageName:view.querySelector("#hj-partner-name").value.trim()||partnerName(),weddingDate:view.querySelector("#hj-date").value,status:"planning",directorStage:"prewedding"});
+                return renderPreWeddingV5();
               }
-              if (action === "pick-hall") {
-                await saveArchive({hall:el.dataset.value,status:"planning"});
-                return renderPreWedding();
+              if(action==="gen-letter"){
+                if(state.loading)return; state.loading=true;el.disabled=true;el.textContent="他正在写……";
+                try{
+                  const t=await weddingAwareText("现在是大婚前夜。你明日会亲自去迎娶 USER。写一封很短的婚前笺给她，像你本人，不要古风模板，不要夸张。哪怕你平时嘴硬或寡言，也要让她知道你明日会来。",150);
+                  await saveArchive({preLetter:t,directorStage:"prewedding"});
+                }catch(_){toast("生成失败，请检查 AI 配置")}
+                state.loading=false;return renderPreWeddingV5();
               }
-              if (action === "gen-prethought") {
-                if (state.loading) return;
-                state.loading = true; el.disabled = true; el.textContent = "他正在想……";
-                try {
-                  const t = await weddingAwareText("现在是婚礼当天清晨，你已经穿好婚服，马上要出门接亲。写出你此刻真实的婚前心绪。不要故作深情，要像你本人。",180);
-                  await saveArchive({preThought:t});
-                } catch(_) { toast("生成失败，请检查当前 AI 配置"); }
-                state.loading = false; return renderPreWedding();
+              if(action==="start-pickup-v5"){await saveArchive({status:"wedding-day",directorStage:"procession"});return renderProcessionV5()}
+              if(action==="to-door-v5"){await saveArchive({directorStage:"door"});return renderDoorV5()}
+              if(["door-silent","door-question","door-heart"].includes(action)){
+                if(state.loading)return;state.loading=true;el.disabled=true;
+                const q=action==="door-heart"?"门里的人让你拿出诚意，问：今日你为什么来娶她？请直接以新郎本人回答。":
+                  action==="door-question"?"隔着门，USER问你：你现在紧张吗？请以你本人真实口吻回答。":
+                  "门里没有回应。你站在门外等了一会儿。请以你本人会有的方式再说一句，让她知道你会等她开门。";
+                try{const t=await weddingAwareText(q,160);await saveArchive({doorAnswer:t,directorStage:"door"})}catch(_){toast("生成失败")}
+                state.loading=false;return renderDoorV5();
               }
-              if (action === "start-pickup") {
-                await saveArchive({status:"wedding-day"});
-                return renderPickup("叩门");
-              }
-              if (action === "answer-door") {
-                if (state.loading) return;
-                state.loading = true; el.disabled = true; el.textContent = "回答中……";
-                try {
-                  const t = await weddingAwareText("你正在接亲堵门。门里的人问：第一次真正意识到，你非她不可，是什么时候？请直接以新郎口吻回答。可以引用你们真实记忆，但不要编造没有依据的重大经历。",150);
-                  await saveArchive({doorAnswer:t});
-                } catch(_) { toast("生成失败"); }
-                state.loading = false; return renderPickup("叩门");
-              }
-              if (action === "pickup-next") return renderPickup(el.dataset.next);
-              if (action === "find-shoe") {
-                const target = state.archive?.shoeTarget || ["屏风后","妆奁下","箱笼中","花架旁"][Math.floor(Math.random()*4)];
-                if (!state.archive?.shoeTarget) await saveArchive({shoeTarget:target});
-                if (el.dataset.value === target) {
-                  await saveArchive({shoeFound:target});
-                  toast("找到了婚鞋");
-                } else {
-                  toast("这里没有，再找找");
+              if(action==="fan-touch"){
+                const p=Number(el.dataset.peek||1);
+                if(p>=2 && !state.archive?.firstLook && !state.loading){
+                  state.loading=true;
+                  try{const t=await weddingAwareText("却扇后，你第一次完整看见穿着婚服的 USER。只写你本人此刻的一句反应或一个短动作，不要旁白，不要模板情话。",120);await saveArchive({firstLook:t,directorStage:"fan"})}catch(_){}
+                  state.loading=false;
                 }
-                return renderPickup("寻鞋");
+                return renderFanV5(p);
               }
-              if (action === "to-hall") return renderHall();
-              if (action === "formal-next") {
-                const n = el.dataset.next;
-                if (n === "婚誓") return renderVows();
-                return renderFormal(n);
+              if(action==="to-hand-v5"){await saveArchive({directorStage:"hand"});return renderHandV5()}
+              if(action==="take-hand-v5"){try{navigator.vibrate?.(30)}catch(_){};await saveArchive({handTaken:true,directorStage:"sedan"});return renderSedanV5()}
+              if(action==="linger-sedan"){toast("轿帘仍在轻晃。你不必急着去下一幕。");return}
+              if(action==="arrive-v5"){await saveArchive({directorStage:"arrival"});return renderArrivalV5()}
+              if(action==="to-hall-v5"){await saveArchive({directorStage:"hall"});return renderHallV5()}
+              if(action==="to-wash-v5"){await saveArchive({directorStage:"wash"});return renderWashV5(false)}
+              if(action==="wash-water"){try{navigator.vibrate?.(18)}catch(_){};await saveArchive({washDone:true,directorStage:"wash"});return renderWashV5(true)}
+              if(action==="to-tonglao-v5"){await saveArchive({directorStage:"tonglao"});return renderTonglaoV5()}
+              if(action==="choose-food"){const f=el.dataset.food;await saveArchive({tonglaoFood:f,directorStage:"tonglao"});return renderTonglaoV5(f)}
+              if(action==="to-hejin-v5"){await saveArchive({directorStage:"hejin"});return renderHejinV5(false)}
+              if(action==="lift-cup"){return renderHejinV5(true)}
+              if(action==="drink-hejin"){
+                try{navigator.vibrate?.(28)}catch(_){}
+                if(!state.archive?.hejinLine&&!state.loading){state.loading=true;try{const t=await weddingAwareText("你刚刚与 USER 完成合卺。请用你本人的方式说一句很短的话，承认这件事对你的意义。不要模板古风。",100);await saveArchive({hejinLine:t})}catch(_){}state.loading=false}
+                toast(state.archive?.hejinLine||"合卺礼成");
+                await saveArchive({hejinDone:true,directorStage:"hair"});setTimeout(renderHairV5,700);return;
               }
-              if (action === "banquet-moment") {
-                if (state.loading) return;
-                state.loading = true; el.disabled = true; el.textContent = "他正在应酬……";
-                try {
-                  const t = await weddingAwareText("正礼已经结束，现在是喜宴。宾客在起哄敬酒。请以你的原本人设说一句此刻会对 USER 说的话。可以轻松一点，但仍然记得今天是你们的婚礼。",120);
-                  const line = view.querySelector("#hj-banquet-line"); if(line) line.textContent = t;
-                  await saveArchive({banquetLine:t});
-                } catch(_) { toast("生成失败"); }
-                state.loading = false; el.disabled = false; el.textContent = "让他在喜宴里说一句";
+              if(action==="tie-hair-v5"){try{navigator.vibrate?.(24)}catch(_){};await saveArchive({hairKeepsake:true,directorStage:"vows"});toast("结发锦囊已收入婚藏");setTimeout(renderVowsV5,700);return}
+              if(action==="draft-user-vow"){
+                if(state.loading)return;state.loading=true;el.disabled=true;el.textContent="代拟中……";
+                try{const t=await weddingAwareText("请站在 USER 的视角，依据 USER 人设与双方关系，草拟一段不超过180字的婚誓。不要替 USER 编造重大经历，不要套用古风模板，必须可以被她继续编辑。",180);view.querySelector("#hj-vow-user-v5").value=t}catch(_){toast("生成失败")}
+                state.loading=false;el.disabled=false;el.textContent="依我的人设拟一份";return;
               }
-              if (action === "to-banquet") return renderBanquet();
-              if (action === "enter-anniversary") return renderAnniversary();
-              if (action === "finish-day") {
-                await saveArchive({completedAt:Date.now(),status:"married"});
-                toast("嘉礼已毕 · 而余生方始");
-                setTimeout(renderMorningAfter,700);
+              if(action==="save-vows-v5"){const v=view.querySelector("#hj-vow-user-v5").value.trim();if(!v)return toast("先写下你的婚誓");await saveArchive({vowUser:v,directorStage:"book",marriageNo:state.archive?.marriageNo||("HJ-"+Date.now().toString(36).toUpperCase())});return renderBookV5("user")}
+              if(action==="partner-seal"){try{navigator.vibrate?.(45)}catch(_){};await saveArchive({partnerSealAt:Date.now(),directorStage:"book"});return renderBookV5("done")}
+              if(action==="ceremony-complete-v5"){await saveArchive({directorStage:"complete",status:"ceremony-complete"});return renderCeremonyCompleteV5()}
+              if(action==="to-banquet-v5"){await saveArchive({directorStage:"banquet"});return renderBanquetV5()}
+              if(action==="banquet-talk-v5"||action==="banquet-toast-v5"){
+                if(state.loading)return;state.loading=true;
+                const task=action==="banquet-toast-v5"?"喜宴上，你和新婚妻子一起举杯。以你本人原本的性格，对她说一句轻松但真诚的话。":"喜宴正热闹，你发现 USER 在偷看你。以你本人会有的方式回应她。";
+                try{const t=await weddingAwareText(task,120);await saveArchive({banquetLine:t})}catch(_){}
+                state.loading=false;return renderBanquetV5();
               }
-              if (action === "generate-blessing") {
-                if (state.loading) return;
-                state.loading = true; el.disabled = true; el.textContent = "书写中…";
-                try {
-                  const blessing = await genAI("blessing");
-                  await saveArchive({blessing});
-                  toast("婚缘辞已成");
-                } catch (e) {
-                  toast("生成失败，请检查当前 AI 配置");
-                } finally {
-                  state.loading = false;
-                  renderRituals();
-                }
+              if(action==="to-night-v5"){await saveArchive({directorStage:"night"});return renderNightV5()}
+              if(action==="night-question"||action==="night-look"){
+                if(state.loading)return;state.loading=true;
+                const task=action==="night-question"?"婚礼结束后只剩你们两个人。USER问：你今天什么时候最紧张？请真实回答。":"婚礼结束后只剩你们两个人。USER问：你今天第一次完整看到我穿婚服时，在想什么？请真实回答。";
+                try{const t=await weddingAwareText(task,180);toast(t)}catch(_){toast("他想了一会儿")}
+                state.loading=false;return;
               }
-              if (action === "open-fan") {
-                const fan = view.querySelector("#hj-fan");
-                fan?.classList.add("open");
-                const line = view.querySelector("#hj-fan-line");
-                if (line) line.textContent = `${partnerName()}：今日见你，此后便记作余生第一眼。`;
-                const rituals = Object.assign({}, state.archive?.rituals || {}, {"却扇":true});
-                await saveArchive({rituals});
-              }
-              if (action === "join-cups") {
-                view.querySelector("#hj-cups")?.classList.add("join");
-                const line = view.querySelector("#hj-cup-line");
-                if (line) line.textContent = "合卺既成，自此同甘共苦。";
-                const rituals = Object.assign({}, state.archive?.rituals || {}, {"合卺":true});
-                await saveArchive({rituals});
-              }
-              if (action === "tie-thread") {
-                view.querySelector("#hj-thread-stage")?.classList.add("tied");
-                const line = view.querySelector("#hj-thread-line");
-                if (line) line.textContent = "结发同心，白首为期。";
-                const rituals = Object.assign({}, state.archive?.rituals || {}, {"结发":true});
-                await saveArchive({rituals});
-              }
-              if (action === "to-vows") return renderVows();
-              if (action === "scene-next") {
-                if (el.dataset.next === "合卺") return renderExitBride();
-                return renderProcessScene(el.dataset.next);
-              }
-              if (action === "ai-vows") {
-                if (state.loading) return;
-                state.loading = true; el.disabled = true; el.textContent = "代拟中…";
-                try {
-                  const text = await genAI("vows");
-                  const um = text.match(/【我方】[:：]?\s*([\s\S]*?)(?=【良人】|$)/);
-                  const pm = text.match(/【良人】[:：]?\s*([\s\S]*)/);
-                  if (um) view.querySelector("#hj-vow-user").value = um[1].trim();
-                  if (pm) view.querySelector("#hj-vow-partner").value = pm[1].trim();
-                  toast("婚誓已代拟，可继续修改");
-                } catch (_) {
-                  toast("生成失败，请检查当前 AI 配置");
-                } finally {
-                  state.loading = false; el.disabled = false; el.textContent = "依人设代拟";
-                }
-              }
-              if (action === "save-vows") {
-                await saveArchive({
-                  vowUser: view.querySelector("#hj-vow-user").value.trim(),
-                  vowPartner: view.querySelector("#hj-vow-partner").value.trim(),
-                  marriageNo: state.archive?.marriageNo || ("HJ-" + Date.now().toString(36).toUpperCase())
-                });
-                return renderCertificate();
-              }
-              if (action === "complete") {
-                const ok = await roche.ui.confirm({title:"落印成书",message:"婚书一经落印，本季便进入婚后纪年。仍可在后续版本中继续扩展岁岁帖。"});
-                if (!ok) return;
-                await saveArchive({status:"ceremony-complete"});
-                toast("嘉礼成");
-                setTimeout(renderCeremonyComplete, 500);
-              }
-              if (action === "certificate") return renderCertificate(false);
-              if (action === "save-note") {
-                const note = view.querySelector("#hj-note").value.trim();
-                await saveArchive({latestNote:note, latestNoteAt:Date.now()});
-                toast("已存入岁岁帖");
-              }
+              if(action==="sleep-v5"){await saveArchive({directorStage:"morning"});return renderMorningV5()}
+              if(action==="finish-wedding-v5"){await saveArchive({completedAt:state.archive?.completedAt||Date.now(),status:"married",directorStage:"married"});return renderAnniversaryV5()}
+              if(action==="certificate-v5") return renderBookV5("done");
+              if(action==="save-note-v5"){const n=view.querySelector("#hj-note").value.trim();await saveArchive({latestNote:n,latestNoteAt:Date.now()});return toast("已存入岁岁帖")}
             });
           });
+          updateMusicButtons();
         }
 
         await loadBase();
         preloadAssets(["bridePrep","pickupDoor","procession","weddingHallEntry","bowCeremony"]);
-        renderHome();
+        renderHomeV5();
 
         root.__hjCleanup = () => {
           clearTimeout(toastTimer);
+          music.stop();
         };
       },
 
