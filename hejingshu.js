@@ -3,7 +3,7 @@
 
   const PLUGIN_ID = "hejingshu";
   const APP_ID = "hejingshu-home";
-  const VERSION = "0.3.0";
+  const VERSION = "0.3.1";
 
   const GOLD = "#D6B56A";
   const DEEP_RED = "#6F0D14";
@@ -201,6 +201,153 @@
 .hj-hall-lines{position:absolute;inset:0;pointer-events:none;background:
  radial-gradient(circle at 50% -10%,rgba(232,198,113,.08),transparent 36%),
  linear-gradient(90deg,transparent 49.8%,rgba(224,190,105,.10) 50%,transparent 50.2%)}
+
+
+/* v0.3.1 · iPhone 页面滚动修复 */
+.hj-app{
+  height:100% !important;
+  min-height:0 !important;
+  overflow:hidden !important;
+}
+.hj-page{
+  height:100% !important;
+  min-height:0 !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch !important;
+  overscroll-behavior-y:contain;
+  touch-action:pan-y !important;
+  padding-bottom:calc(130px + env(safe-area-inset-bottom)) !important;
+  box-sizing:border-box !important;
+}
+.hj-home{
+  min-height:100% !important;
+  overflow-y:auto !important;
+  -webkit-overflow-scrolling:touch !important;
+  touch-action:pan-y !important;
+}
+.hj-grid,.hj-person,.hj-person *{
+  touch-action:pan-y !important;
+}
+
+/* v0.3.1 · 合卺书封面重绘 */
+.hj-opening-scroll{
+  width:min(88vw,410px) !important;
+  min-height:610px !important;
+  padding:0 !important;
+  border:0 !important;
+  background:
+    radial-gradient(circle at 50% 18%,rgba(225,184,93,.10),transparent 27%),
+    linear-gradient(180deg,#991922 0%,#85131b 48%,#6f0d14 100%) !important;
+  box-shadow:
+    0 26px 70px rgba(35,0,3,.30),
+    inset 0 0 0 1px rgba(231,199,117,.32),
+    inset 0 0 38px rgba(43,0,4,.18) !important;
+  overflow:hidden !important;
+  position:relative !important;
+}
+.hj-opening-scroll:before{
+  content:"" !important;
+  position:absolute !important;
+  inset:12px !important;
+  height:auto !important;
+  left:12px !important;right:12px !important;top:12px !important;bottom:12px !important;
+  border:1px solid rgba(226,194,112,.58) !important;
+  background:none !important;
+  pointer-events:none !important;
+}
+.hj-opening-scroll:after{
+  content:"" !important;
+  position:absolute !important;
+  width:74px !important;height:74px !important;
+  left:22px !important;top:22px !important;right:auto !important;bottom:auto !important;
+  border-left:1px solid rgba(229,197,116,.48) !important;
+  border-top:1px solid rgba(229,197,116,.48) !important;
+  background:none !important;
+  pointer-events:none !important;
+}
+.hj-opening{
+  min-height:610px !important;
+  padding:76px 34px 62px !important;
+  box-sizing:border-box !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  position:relative !important;
+  z-index:2 !important;
+}
+.hj-opening:before,.hj-opening:after{
+  content:"◇" !important;
+  position:absolute !important;
+  color:rgba(230,197,111,.55) !important;
+  font-size:20px !important;
+  line-height:1 !important;
+}
+.hj-opening:before{top:31px;right:31px}
+.hj-opening:after{bottom:31px;left:31px}
+.hj-knot{
+  width:72px !important;height:72px !important;
+  display:flex !important;align-items:center !important;justify-content:center !important;
+  border:1px solid rgba(236,205,126,.72) !important;
+  outline:1px solid rgba(236,205,126,.22) !important;
+  outline-offset:7px !important;
+  border-radius:50% !important;
+  color:#efd17e !important;
+  font-size:32px !important;
+  margin:0 0 34px !important;
+  background:rgba(112,10,16,.18) !important;
+}
+.hj-title{
+  font-family:"Songti SC","STSong","Noto Serif CJK SC",serif !important;
+  font-size:46px !important;
+  font-weight:400 !important;
+  letter-spacing:.22em !important;
+  margin-right:-.22em !important;
+  color:#f0d284 !important;
+  text-shadow:0 1px 12px rgba(244,208,119,.10) !important;
+}
+.hj-sub{
+  margin-top:16px !important;
+  color:#d9bd7a !important;
+  letter-spacing:.26em !important;
+  font-size:12px !important;
+}
+.hj-rule{
+  width:116px !important;height:1px !important;
+  margin:30px auto !important;
+  background:linear-gradient(90deg,transparent,#d3af5b,transparent) !important;
+}
+.hj-quote{
+  color:#eadfc7 !important;
+  font-family:"Songti SC","STSong",serif !important;
+  font-size:14px !important;
+  line-height:2.15 !important;
+  letter-spacing:.06em !important;
+  margin-bottom:32px !important;
+}
+.hj-opening .hj-primary{
+  min-width:118px !important;
+  width:auto !important;
+  padding:12px 28px !important;
+  border-radius:4px !important;
+  background:linear-gradient(180deg,#d9b45f,#b98b38) !important;
+  color:#5e1013 !important;
+  border:1px solid rgba(246,216,137,.7) !important;
+  box-shadow:0 8px 22px rgba(52,3,7,.22) !important;
+}
+.hj-cloud{display:none !important}
+.hj-gold-dust i{width:2px !important;height:2px !important;opacity:.22 !important}
+
+
+.hj-page .hj-actions{
+  position:relative;
+  z-index:3;
+}
+.hj-page > .hj-actions:last-child{
+  margin-top:22px !important;
+  padding-bottom:20px !important;
+}
 
 </style>`;
   }
@@ -889,8 +1036,12 @@
                 return renderNames();
               }
               if (action === "select-user") {
+                const scroller = view.querySelector(".hj-page");
+                const y = scroller?.scrollTop || 0;
                 state.selectedUser = state.users.find(u=>u.id===el.dataset.id) || state.selectedUser;
-                return renderChoose();
+                renderChoose();
+                requestAnimationFrame(()=>{ const s=view.querySelector(".hj-page"); if(s) s.scrollTop=y; });
+                return;
               }
               if (action === "start") return renderChoose();
               if (action === "select-char") {
