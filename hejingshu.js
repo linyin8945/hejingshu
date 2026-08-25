@@ -3,7 +3,7 @@
 
   const PLUGIN_ID = "hejingshu";
   const APP_ID = "hejingshu-home";
-  const VERSION = "0.8.3";
+  const VERSION = "0.8.4";
 
   const GOLD = "#D6B56A";
   const DEEP_RED = "#6F0D14";
@@ -1323,13 +1323,14 @@
 
         function stripStageDirections(text) {
           let s = String(text || "").trim();
-          // 删除 AI 常见的括号舞台说明，婚书里只保留真正说出口的誓词
+          // 只删除舞台说明，不再剥掉对白本身的中文引号。
           s = s.replace(/（[^（）]{0,160}）/g, "")
                .replace(/\([^()]{0,160}\)/g, "")
                .replace(/【[^【】]{0,120}】/g, "")
                .replace(/\[[^\[\]]{0,120}\]/g, "");
-          s = s.replace(/^\s*["“”'‘’]+|["“”'‘’]+\s*$/g, "");
           s = s.replace(/\n{3,}/g, "\n\n").trim();
+          // 每一行以及整段都检查一次，确保“……”成对闭合。
+          s = normalizeChineseDialogueQuotes(s);
           return s;
         }
 
@@ -1355,7 +1356,8 @@
 2. 叙述新郎动作时必须使用“${name}”或“他”，禁止用“我”作为叙述视角。
 3. 只有新郎真正说出口的台词里可以使用“我”。
 4. 不要出现括号舞台说明，不要写“（动作）”“（心理）”。
-5. 不要代替 USER 描写她未选择的心理或台词。`, maxChars
+5. 不要代替 USER 描写她未选择的心理或台词。
+6. 任何直接对白只要用了中文左引号“，同一句话结束时必须用中文右引号”闭合；标点放在右引号前，例如：“你好，我的妻子。”绝不能输出只有左引号没有右引号的残缺对白。`, maxChars
           );
           return stripStageDirections(result);
         }
@@ -2286,30 +2288,21 @@
         function renderDoorV5() {
           const a=state.archive||{};
           const dialogue=doorDialogueText(a);
+          const answeredCount=[a.doorAnswer1,a.doorAnswer2,a.doorCustomAnswer].filter(Boolean).length;
           const q1=!!a.doorAnswer1;
           const q2=!!a.doorAnswer2;
-          let actions="";
-          if(!q1){
-            actions=`<div class="hj-door-questions">
-              <button class="hj-primary" data-action="door-q1-v82">第一问 · 今日为何而来？</button>
-              <button class="hj-secondary" data-action="door-custom-v82">自定义一问</button>
-            </div>`;
-          }else if(!q2){
-            actions=`<div class="hj-door-questions">
-              <button class="hj-primary" data-action="door-q2-v82">第二问 · 此后愿如何待我？</button>
-              <button class="hj-secondary" data-action="door-custom-v82">自定义一问</button>
-            </div>`;
-          }else{
-            actions=`<div class="hj-door-questions">
-              <button class="hj-secondary" data-action="door-custom-v82">自定义一问</button>
-              <button class="hj-primary" data-action="door-open-v5">两问既答 · 开门见他</button>
-            </div>`;
-          }
+          const qc=!!a.doorCustomAnswer;
+          let buttons=[];
+          if(!q1) buttons.push(`<button class="hj-primary" data-action="door-q1-v82">第一问 · 今日为何而来？</button>`);
+          if(!q2) buttons.push(`<button class="hj-primary" data-action="door-q2-v82">第二问 · 此后愿如何待我？</button>`);
+          if(!qc) buttons.push(`<button class="hj-secondary" data-action="door-custom-v82">自定义一问</button>`);
+          if(answeredCount>=2) buttons.push(`<button class="hj-primary" data-action="door-open-v5">两问既答 · 开门见他</button>`);
+          const actions=`<div class="hj-door-questions">${buttons.join("")}</div>`;
 
           view.innerHTML=filmShell({
             asset:"pickupDoor",title:"朱门叩问",kicker:"亲 迎",
             line:dialogue || "门没有立刻打开。门里的人声轻了一点，门外也安静下来。今日这一门，不问礼数，只问真心。",
-            help:"朱门叩问：迎亲到门前，新郎隔门回答两道关于来意与相守的问题。若你还有真正想问他的，也可以亲自再问一题。",
+            help:"朱门叩问：这一关只需完成任意两问即可开门。你可以回答两道内置问题，也可以用自定义问题替代其中任意一道；自定义问题同样计入两问，不会再强迫你补答内置题。",
             actions,
             back:"procession",
             extra:""
@@ -2477,7 +2470,7 @@
                 : "司礼唱礼：“同牢——共席而食。” 三样礼食置于席前，你可以先取一味。",
             help:"同牢：新人同席共食，象征从今日起同居一室、同食一席。这里保留三样礼食供你选择。",
             actions:picked
-              ? `<button class="hj-primary" data-action="to-hejin-v5">同牢礼成 · 下一礼合卺</button>`
+              ? `<button class="hj-primary" data-action="tonglao-next-v84">同牢礼成 · 下一礼合卺</button>`
               : `<div class="hj-tonglao-foods">${foods.map(f=>`<button class="hj-secondary" data-action="choose-food" data-food="${esc(f)}">${esc(f)}</button>`).join("")}</div>`,
             back:"wash",
             extra:""
@@ -3100,7 +3093,11 @@
                 });
                 return renderTonglaoV5(f);
               }
-              if(action==="to-hejin-v5"){await saveArchive({directorStage:"hejin"});return renderHejinV5(false)}
+              if(action==="tonglao-next-v84" || action==="to-hejin-v5"){
+                if(state.loading) return;
+                await saveArchive({directorStage:"hejin"});
+                return renderHejinV5(false);
+              }
               if(action==="lift-cup"){return renderHejinV5(true)}
               if(action==="drink-hejin"){
                 try{navigator.vibrate?.(28)}catch(_){}
