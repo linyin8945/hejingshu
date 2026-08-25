@@ -3,7 +3,7 @@
 
   const PLUGIN_ID = "hejingshu";
   const APP_ID = "hejingshu-home";
-  const VERSION = "0.8.4";
+  const VERSION = "0.8.5";
 
   const GOLD = "#D6B56A";
   const DEEP_RED = "#6F0D14";
@@ -1141,6 +1141,22 @@
   letter-spacing:.12em;
 }
 
+
+/* v0.8.5 · 真正的存档面板 */
+.hj-save-sheet{
+  position:absolute;left:18px;right:18px;top:50%;transform:translateY(-50%);
+  z-index:80;padding:22px 18px;border-radius:22px;
+  background:linear-gradient(180deg,rgba(82,8,12,.97),rgba(52,5,8,.98));
+  border:1px solid rgba(224,190,105,.58);box-shadow:0 24px 70px rgba(0,0,0,.42);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.hj-save-sheet-title{font-size:22px;letter-spacing:.18em;color:#efd488;text-align:center;margin-bottom:16px}
+.hj-save-row{padding:13px 14px;border:1px solid rgba(214,181,106,.25);border-radius:14px;background:rgba(255,255,255,.035);margin-bottom:12px}
+.hj-save-label{font-size:10px;letter-spacing:.18em;color:#bfa978;margin-bottom:5px}
+.hj-save-value{font-size:14px;line-height:1.7;color:#f1e2bd}
+.hj-save-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.hj-save-actions .hj-primary,.hj-save-actions .hj-secondary{width:100%;padding-left:10px;padding-right:10px}
+
 </style>`;
   }
 
@@ -1259,7 +1275,7 @@
           return `<div class="hj-v5-top">
             <button class="hj-iconbtn" data-action="back" data-target="${esc(back)}">‹</button>
             <div class="hj-top-title">${esc(title)}</div>
-            <div>${state.archive?.id?`<button class="hj-save-btn" data-action="quick-save-v83" aria-label="保存婚礼进度">存</button>`:""}<button class="hj-music-btn" data-action="music-toggle">${music.muted?"♩":"♫"}</button>
+            <div>${state.archive?.id?`<button class="hj-save-btn" data-action="open-save-v85" aria-label="打开婚礼存档">存</button>`:""}<button class="hj-music-btn" data-action="music-toggle">${music.muted?"♩":"♫"}</button>
             <button class="hj-iconbtn" data-action="close">×</button></div>
           </div>`;
         }
@@ -1520,6 +1536,43 @@
           if(a.doorAnswer2) lines.push(`第二问 · 此后漫长岁月，你愿如何待我？\n${pname}：${a.doorAnswer2}`);
           if(a.doorCustomQuestion && a.doorCustomAnswer) lines.push(`你问：${a.doorCustomQuestion}\n${pname}：${a.doorCustomAnswer}`);
           return lines.join("\n\n");
+        }
+
+        function stageDisplayName(stage) {
+          const names={
+            choose:"择新人",names:"婚书初立",prewedding:"大婚前夜",procession:"迎亲",
+            door:"朱门叩问",fan:"却扇",hand:"执手出阁",sedan:"花轿归程",arrival:"迎卿下轿",
+            hall:"入堂",bow:"拜堂",wash:"沃盥",tonglao:"同牢",hejin:"合卺",hair:"结发",
+            vows:"婚誓",book:"婚书双印",complete:"正礼礼成",banquetentry:"入宴",banquet:"喜宴",
+            banquetend:"席散",returnroom:"归房",veil:"揭盖头",night:"花烛",finale:"婚礼落幕"
+          };
+          return names[stage]||"嘉礼进行中";
+        }
+
+        function formatSavedTime(ts) {
+          if(!ts) return "尚未记录";
+          try{
+            const d=new Date(ts);
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+          }catch(_){return "已保存"}
+        }
+
+        function showSaveSheet() {
+          root.querySelector(".hj-save-sheet")?.remove();
+          if(!state.archive) return toast("当前还没有可保存的婚礼");
+          const a=state.archive;
+          const s=document.createElement("div");
+          s.className="hj-save-sheet";
+          s.innerHTML=`<div class="hj-save-sheet-title">嘉 礼 存 档</div>
+            <div class="hj-save-row"><div class="hj-save-label">当前礼程</div><div class="hj-save-value">${esc(stageDisplayName(a.directorStage))}</div></div>
+            <div class="hj-save-row"><div class="hj-save-label">最近保存</div><div class="hj-save-value">${esc(formatSavedTime(a.savedAt))}</div></div>
+            <div class="hj-save-row"><div class="hj-save-label">新人</div><div class="hj-save-value">${esc(a.userMarriageName||userName())} · ${esc(a.partnerMarriageName||partnerName())}</div></div>
+            <div class="hj-save-actions">
+              <button class="hj-secondary" data-action="close-save-v85">返回婚礼</button>
+              <button class="hj-primary" data-action="save-now-v85">保存当前进度</button>
+            </div>`;
+          root.querySelector(".hj-shell").appendChild(s);
+          bind();
         }
 
         async function writeWeddingToRocheMemory() {
@@ -2470,9 +2523,54 @@
                 : "司礼唱礼：“同牢——共席而食。” 三样礼食置于席前，你可以先取一味。",
             help:"同牢：新人同席共食，象征从今日起同居一室、同食一席。这里保留三样礼食供你选择。",
             actions:picked
-              ? `<button class="hj-primary" data-action="tonglao-next-v84">同牢礼成 · 下一礼合卺</button>`
+              ? `<button class="hj-primary" data-action="tonglao-next-v85">同牢礼成 · 下一礼合卺</button>`
               : `<div class="hj-tonglao-foods">${foods.map(f=>`<button class="hj-secondary" data-action="choose-food" data-food="${esc(f)}">${esc(f)}</button>`).join("")}</div>`,
             back:"wash",
+            extra:""
+          });
+          bind();
+        }
+
+        function renderHejinV5(lifted=false) {
+          music.play("ceremony",.32);
+          const a=state.archive||{};
+          const done=!!a.hejinDone;
+          view.innerHTML=filmShell({
+            asset:"hejinCups",title:"合卺",kicker:"正 婚 · 第 四 礼",
+            line:a.hejinLine
+              ? esc(a.hejinLine)
+              : done
+                ? "两卺已饮。杯盏轻碰的一声，被安静地留在正礼里。"
+                : lifted
+                  ? `你执起自己的卺，${esc(partnerDisplayName())}也端起另一只。两盏将在这一刻相合。`
+                  : "司礼唱礼：“合卺——新人各执其一。”",
+            help:"合卺：卺分为二，新人各执一半共饮，再合而为一，取从此甘苦同尝、夫妻一体之意。",
+            actions:done
+              ? `<button class="hj-primary" data-action="to-hair-v6">合卺礼成 · 下一礼结发</button>`
+              : lifted
+                ? `<button class="hj-primary" data-action="drink-hejin">与 ${esc(partnerDisplayName())} 共饮合卺</button>`
+                : `<button class="hj-primary" data-action="lift-cup">执卺</button>`,
+            back:"tonglao",
+            extra:""
+          });
+          bind();
+        }
+
+        function renderHairV5() {
+          music.play("ceremony",.28);
+          const a=state.archive||{};
+          view.innerHTML=filmShell({
+            asset:"hairKnot",title:"结发",kicker:"正 婚 · 第 五 礼",
+            line:a.hairLine
+              ? esc(a.hairLine)
+              : a.hairKeepsake
+                ? "两缕青丝已经同系并妥帖收好。"
+                : "各取一缕青丝，以红线同系。不是为了繁复礼数，只把今日这一诺留作信物。",
+            help:"结发：以两缕青丝同系为信，象征从此结为夫妻。",
+            actions:a.hairKeepsake
+              ? `<button class="hj-primary" data-action="to-vows-v6">结发礼成 · 请婚誓</button>`
+              : `<button class="hj-primary" data-action="tie-hair-v5">同系青丝</button>`,
+            back:"hejin",
             extra:""
           });
           bind();
@@ -2823,6 +2921,7 @@
           root.querySelectorAll("[data-action]").forEach(el=>{
             if(el.__hjBound) return; el.__hjBound=true;
             el.addEventListener("click",async()=>{
+              try {
               const action=el.dataset.action;
               if(action==="close") { music.stop(); return roche.ui.closeApp(); }
               if(action==="music-toggle") return music.toggle();
@@ -2876,36 +2975,54 @@
                 });
                 return renderProcessionV5();
               }
-              if(action==="quick-save-v83"){
-                if(!state.archive)return toast("当前还没有可保存的婚礼");
+              if(action==="open-save-v85") return showSaveSheet();
+              if(action==="close-save-v85") return el.closest(".hj-save-sheet")?.remove();
+              if(action==="save-now-v85"){
                 await saveArchive({});
                 toast("嘉礼进度已保存");
+                el.closest(".hj-save-sheet")?.remove();
                 return;
               }
               if(action==="new-marriage") return createNewMarriage();
               if(action==="resume-married") return renderFinaleV8();
               if(action==="resume-wedding"){
-                await loadBase();
-                if(!state.archive) return renderHomeV5();
-                const s=state.archive.directorStage||"prewedding";
-                const map={
-                  choose:renderChooseV5,names:renderNamesV5,prewedding:renderPreWeddingV5,
-                  procession:renderProcessionV5,door:renderDoorV5,
-                  fan:()=>renderFanV5(state.archive?.firstLook?2:0),
-                  hand:renderHandV5,sedan:renderSedanV5,arrival:renderArrivalV5,
-                  hall:renderHallV5,bow:renderBowV7,
-                  wash:()=>renderWashV5(!!state.archive?.washDone),
-                  tonglao:()=>renderTonglaoV5(state.archive?.tonglaoFood||""),
-                  hejin:()=>renderHejinV5(!!state.archive?.hejinDone),
-                  hair:renderHairV5,vows:renderVowsV5,
-                  book:()=>renderBookV5(state.archive?.partnerSealAt?"done":state.archive?.userSealAt?"partner":"user"),
-                  complete:renderCeremonyCompleteV5,
-                  banquetentry:renderBanquetEntryV8,banquet:renderBanquetV5,
-                  banquetend:renderBanquetEndV8,returnroom:renderReturnRoomV8,
-                  veil:renderVeilLiftV6,night:renderNightV5,finale:renderFinaleV8
-                };
-                const fn=map[s]||renderPreWeddingV5;
-                return fn();
+                try{
+                  await loadBase();
+                  if(!state.archive) return renderHomeV5();
+                  const s=state.archive.directorStage||"prewedding";
+                  switch(s){
+                    case "choose": return renderChooseV5();
+                    case "names": return renderNamesV5();
+                    case "prewedding": return renderPreWeddingV5();
+                    case "procession": return renderProcessionV5();
+                    case "door": return renderDoorV5();
+                    case "fan": return renderFanV5(state.archive?.firstLook?2:0);
+                    case "hand": return renderHandV5();
+                    case "sedan": return renderSedanV5();
+                    case "arrival": return renderArrivalV5();
+                    case "hall": return renderHallV5();
+                    case "bow": return renderBowV7();
+                    case "wash": return renderWashV5(!!state.archive?.washDone);
+                    case "tonglao": return renderTonglaoV5(state.archive?.tonglaoFood||"");
+                    case "hejin": return renderHejinV5(!!state.archive?.hejinDone);
+                    case "hair": return renderHairV5();
+                    case "vows": return renderVowsV5();
+                    case "book": return renderBookV5(state.archive?.partnerSealAt?"done":state.archive?.userSealAt?"partner":"user");
+                    case "complete": return renderCeremonyCompleteV5();
+                    case "banquetentry": return renderBanquetEntryV8();
+                    case "banquet": return renderBanquetV5();
+                    case "banquetend": return renderBanquetEndV8();
+                    case "returnroom": return renderReturnRoomV8();
+                    case "veil": return renderVeilLiftV6();
+                    case "night": return renderNightV5();
+                    case "finale": return renderFinaleV8();
+                    default: return renderPreWeddingV5();
+                  }
+                }catch(error){
+                  console.error("[合卺书] 续礼失败",error);
+                  toast("存档读取失败，请再试一次");
+                  return;
+                }
               }
               if(action==="select-user"){
                 const y=view.querySelector(".hj-page")?.scrollTop||0;
@@ -3093,7 +3210,7 @@
                 });
                 return renderTonglaoV5(f);
               }
-              if(action==="tonglao-next-v84" || action==="to-hejin-v5"){
+              if(action==="tonglao-next-v85" || action==="to-hejin-v5"){
                 if(state.loading) return;
                 await saveArchive({directorStage:"hejin"});
                 return renderHejinV5(false);
@@ -3248,17 +3365,21 @@
                 return renderFinaleV8();
               }
               if(action==="certificate-v5") return renderBookV5("done");
-              if(action==="toggle-memories-v7"){await saveArchive({showMemories:!state.archive?.showMemories});return renderAnniversaryV5()}
+              if(action==="toggle-memories-v7"){await saveArchive({showMemories:!state.archive?.showMemories});return renderFinaleV8()}
               if(action==="save-note-v5"){
-                const n=view.querySelector("#hj-note").value.trim();
+                const n=view.querySelector("#hj-note")?.value.trim();
                 if(!n)return toast("先写下想留给今天的话");
-                const end=beginGenerating(el,"正在存入岁岁帖");
+                const end=beginGenerating(el,"正在保存");
                 const createdAt=Date.now();
                 const oldNotes=Array.isArray(state.archive?.notes)?state.archive.notes:state.archive?.latestNote?[{text:state.archive.latestNote,createdAt:state.archive.latestNoteAt||createdAt}]:[];
                 await saveArchive({latestNote:n,latestNoteAt:createdAt,notes:[...oldNotes,{text:n,createdAt}]});
                 end();
-                renderAnniversaryV5();
+                renderFinaleV8();
                 return;
+              }
+              } catch(error) {
+                console.error("[合卺书] 按钮执行失败", el.dataset.action, error);
+                toast("这一处没有顺利继续，请再点一次");
               }
             });
           });
