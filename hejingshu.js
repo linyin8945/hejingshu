@@ -3,7 +3,7 @@
 
   const PLUGIN_ID = "hejingshu";
   const APP_ID = "hejingshu-home";
-  const VERSION = "0.9.1";
+  const VERSION = "1.0.0";
 
   const GOLD = "#D6B56A";
   const DEEP_RED = "#6F0D14";
@@ -1174,6 +1174,179 @@
   background:linear-gradient(180deg,rgba(55,5,8,0),rgba(55,5,8,.78) 28%,rgba(55,5,8,.94));
   backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)
 }
+/* =========================================================
+   v1.0.0 · 婚礼存档册 / 嘉礼录
+   ========================================================= */
+
+.hj-save-sheet{
+  max-height:min(78vh,720px) !important;
+  overflow-y:auto !important;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:calc(18px + env(safe-area-inset-bottom));
+}
+.hj-save-title-note{
+  margin:-3px 0 16px;
+  text-align:center;
+  color:#cdb887;
+  font-size:11px;
+  letter-spacing:.13em;
+}
+.hj-save-create{
+  border:1px solid rgba(224,190,111,.28);
+  border-radius:18px;
+  padding:14px;
+  margin:14px 0;
+  background:linear-gradient(145deg,rgba(124,16,22,.56),rgba(52,5,9,.62));
+}
+.hj-save-name-input{
+  width:100%;
+  box-sizing:border-box;
+  border:1px solid rgba(231,203,130,.34);
+  border-radius:13px;
+  background:rgba(64,6,10,.48);
+  color:#f5e6c6;
+  outline:none;
+  padding:12px 13px;
+  font:inherit;
+  font-size:14px;
+}
+.hj-save-name-input::placeholder{color:rgba(244,229,199,.45)}
+.hj-slot-list{display:flex;flex-direction:column;gap:11px;margin-top:13px}
+.hj-slot{
+  border:1px solid rgba(221,190,112,.23);
+  border-radius:17px;
+  padding:13px;
+  background:linear-gradient(145deg,rgba(111,13,18,.50),rgba(48,4,8,.66));
+  box-shadow:inset 0 0 0 1px rgba(255,231,173,.025);
+}
+.hj-slot-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.hj-slot-name{font-size:17px;color:#f1d896;line-height:1.35}
+.hj-slot-stage{
+  flex:0 0 auto;
+  border:1px solid rgba(227,196,118,.25);
+  border-radius:999px;
+  padding:5px 9px;
+  font-size:9px;
+  letter-spacing:.10em;
+  color:#d9c493;
+}
+.hj-slot-meta{margin-top:7px;font-size:11px;line-height:1.75;color:#cdbb94}
+.hj-slot-preview{
+  margin-top:8px;
+  padding-top:8px;
+  border-top:1px solid rgba(230,198,120,.14);
+  color:#e7d9bb;
+  font-size:12px;
+  line-height:1.75;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.hj-slot-actions{display:grid;grid-template-columns:1.25fr 1fr .72fr;gap:8px;margin-top:11px}
+.hj-slot-actions button{min-width:0 !important;padding-left:8px !important;padding-right:8px !important;font-size:12px !important}
+.hj-slot-empty{
+  padding:20px 14px;
+  text-align:center;
+  color:#bda97f;
+  line-height:1.9;
+  border:1px dashed rgba(223,190,109,.22);
+  border-radius:16px;
+}
+
+/* 嘉礼录入口 */
+.hj-record-entry{
+  margin-top:12px;
+  width:100%;
+  border:1px solid rgba(235,203,126,.30);
+  border-radius:18px;
+  padding:15px 17px;
+  text-align:left;
+  background:
+    linear-gradient(130deg,rgba(139,19,24,.55),rgba(58,6,10,.72)),
+    radial-gradient(circle at 82% 10%,rgba(225,188,99,.16),transparent 36%);
+  color:#f0d799;
+  box-shadow:0 14px 32px rgba(31,0,3,.18);
+}
+.hj-record-entry-title{font-size:19px;letter-spacing:.15em}
+.hj-record-entry-sub{margin-top:7px;font-size:11px;color:#d1bc8c;letter-spacing:.08em}
+
+/* 嘉礼录总页 */
+.hj-record-page{
+  height:100%;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:76px 22px calc(32px + env(safe-area-inset-bottom));
+  box-sizing:border-box;
+  background:
+    radial-gradient(circle at 50% -10%,rgba(195,54,55,.25),transparent 36%),
+    linear-gradient(180deg,#5b080d 0%,#7c1017 42%,#4b0509 100%);
+}
+.hj-record-hero{text-align:center;padding:18px 4px 22px}
+.hj-record-seal{
+  width:56px;height:56px;border:1px solid rgba(237,205,126,.42);
+  border-radius:50%;margin:0 auto 13px;display:flex;align-items:center;justify-content:center;
+  color:#ecd38e;font-size:25px;box-shadow:0 0 0 5px rgba(219,179,84,.055);
+}
+.hj-record-title{font-size:31px;color:#f0d991;letter-spacing:.22em;margin-left:.22em}
+.hj-record-sub{margin-top:9px;color:#cfb985;font-size:11px;letter-spacing:.15em}
+.hj-record-count{margin-top:6px;color:#ae9972;font-size:10px}
+.hj-record-cards{display:flex;flex-direction:column;gap:14px}
+.hj-record-card{
+  width:100%;text-align:left;border:1px solid rgba(232,200,119,.27);
+  border-radius:20px;padding:18px 16px;
+  color:#f2dfb5;
+  background:
+    linear-gradient(135deg,rgba(129,17,22,.76),rgba(63,5,9,.86)),
+    radial-gradient(circle at 90% 8%,rgba(237,203,119,.12),transparent 34%);
+  box-shadow:0 14px 28px rgba(28,0,3,.16);
+}
+.hj-record-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.hj-record-names{font-size:20px;color:#efd794}
+.hj-record-status{font-size:9px;letter-spacing:.12em;color:#d1bb84;border:1px solid rgba(228,195,115,.22);border-radius:999px;padding:5px 8px}
+.hj-record-date{margin-top:7px;color:#cbb78d;font-size:11px}
+.hj-record-progress{margin-top:12px;padding-top:11px;border-top:1px solid rgba(230,199,120,.14);font-size:12px;line-height:1.8;color:#eadcc0}
+.hj-record-open{margin-top:12px;color:#e2c675;font-size:11px;letter-spacing:.10em}
+
+/* 嘉礼长卷 */
+.hj-scroll-page{
+  height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:76px 18px calc(40px + env(safe-area-inset-bottom));
+  box-sizing:border-box;
+  background:linear-gradient(180deg,#53070b,#7b1016 28%,#59070c);
+}
+.hj-scroll-cover{
+  border:1px solid rgba(232,199,117,.30);border-radius:22px;padding:24px 18px;text-align:center;
+  background:linear-gradient(145deg,rgba(129,17,23,.80),rgba(68,5,10,.86));
+  box-shadow:0 16px 34px rgba(31,0,3,.18);
+}
+.hj-scroll-kicker{font-size:10px;letter-spacing:.28em;color:#c9ad70}
+.hj-scroll-names{font-size:27px;color:#f0d58c;margin-top:13px;letter-spacing:.10em}
+.hj-scroll-date{margin-top:10px;color:#cdb98c;font-size:11px}
+.hj-scroll-line{
+  width:1px;height:30px;background:linear-gradient(#d3b468,rgba(211,180,104,.18));margin:0 auto;
+}
+.hj-scroll-section{
+  position:relative;border:1px solid rgba(226,194,113,.20);border-radius:18px;padding:15px 15px 16px 18px;
+  margin-bottom:12px;background:rgba(72,6,10,.48);
+}
+.hj-scroll-section::before{
+  content:"";position:absolute;left:-5px;top:20px;width:9px;height:9px;border-radius:50%;
+  background:#cfae61;box-shadow:0 0 0 5px rgba(207,174,97,.08);
+}
+.hj-scroll-section-title{color:#efd48c;font-size:17px;letter-spacing:.12em}
+.hj-scroll-section-copy{margin-top:9px;color:#eadcc0;white-space:pre-line;line-height:1.95;font-size:13px}
+.hj-scroll-section-note{margin-top:7px;color:#bba578;font-size:10px;letter-spacing:.08em}
+.hj-scroll-empty{text-align:center;padding:32px 15px;color:#c4ae80;line-height:2}
+
+/* 存档改名小层 */
+.hj-rename-sheet{
+  position:absolute;z-index:95;left:18px;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));
+  border:1px solid rgba(231,199,119,.32);border-radius:20px;padding:16px;
+  background:linear-gradient(160deg,rgba(102,10,15,.98),rgba(46,3,7,.98));
+  box-shadow:0 22px 60px rgba(20,0,2,.45);
+}
+.hj-rename-title{text-align:center;color:#efd58d;font-size:18px;letter-spacing:.14em;margin-bottom:12px}
 </style>`;
   }
 
@@ -1609,7 +1782,7 @@
             choose:"择新人",names:"婚书初立",prewedding:"大婚前夜",procession:"迎亲",
             door:"朱门叩问",fan:"却扇",hand:"执手出阁",sedan:"花轿归程",arrival:"迎卿下轿",
             hall:"入堂",bow:"拜堂",wash:"沃盥",tonglao:"同牢",hejin:"合卺",hair:"结发",
-            vows:"婚誓",book:"婚书双印",complete:"正礼礼成",banquetentry:"入宴",banquet:"喜宴",
+            vows:"婚誓",book:"婚书双印",complete:"正礼礼成",bridalentry:"暂归喜房",veil:"揭盖头",bridalrest:"喜房暂歇",banquetentry:"入宴",banquet:"喜宴",
             banquetend:"席散",returnroom:"归房",veil:"揭盖头",night:"花烛",finale:"婚礼落幕"
           };
           return names[stage]||"嘉礼进行中";
@@ -1623,21 +1796,282 @@
           }catch(_){return "已保存"}
         }
 
-        function showSaveSheet() {
+
+        function cloneData(obj){
+          try{return JSON.parse(JSON.stringify(obj))}
+          catch(_){return Object.assign({},obj)}
+        }
+
+        function currentStoryProgress(a){
+          if(!a)return {count:0,preview:""};
+          const keys=["bridalRestStory","nightStory"];
+          const turns=keys.flatMap(k=>Array.isArray(a[k])?a[k]:[]);
+          const last=turns[turns.length-1];
+          if(last) return {count:turns.length,preview:last.text||""};
+          const candidates=[
+            a.returnRoomLine,a.banquetEndLine,a.banquetLine,a.banquetEntryLine,
+            a.bridalRestLine,a.veilLine,a.bridalEntryLine,a.partnerSealLine,a.vowReaction,
+            a.hairLine,a.hejinLine,a.tonglaoLine,a.washLine,a.afterCeremonyLine,
+            a.arrivalLine,a.sedanLine,a.sedanBoardingLine,a.handLine,a.firstLook,
+            a.doorCustomAnswer2,a.doorAnswer2,a.doorCustomAnswer1,a.doorAnswer1,
+            a.processionLine,a.groomNightLine,a.preNightLine,a.preLetter
+          ].filter(Boolean);
+          return {count:0,preview:candidates[0]||""};
+        }
+
+        function defaultSlotName(a){
+          const stage=stageDisplayName(a?.directorStage);
+          const p=currentStoryProgress(a);
+          return p.count ? `${stage} · 续写${p.count}段` : `${stage} · ${formatSavedTime(Date.now()).slice(5)}`;
+        }
+
+        async function getSaveSlots(){
+          const all=await safeGet(storage,"marriageSaveSlots",[]);
+          return Array.isArray(all)?all:[];
+        }
+
+        async function setSaveSlots(list){
+          await storage.set("marriageSaveSlots",list);
+        }
+
+        async function createNamedSave(name){
+          if(!state.archive)return;
+          const slots=await getSaveSlots();
+          const snap=cloneData(state.archive);
+          const slot={
+            id:uid(),
+            sourceArchiveId:state.archive.id,
+            name:(name||"").trim()||defaultSlotName(state.archive),
+            stage:state.archive.directorStage||"prewedding",
+            createdAt:Date.now(),
+            updatedAt:Date.now(),
+            snapshot:snap
+          };
+          slots.push(slot);
+          await setSaveSlots(slots);
+          return slot;
+        }
+
+        async function renameSaveSlot(id,name){
+          const slots=await getSaveSlots();
+          const item=slots.find(x=>x.id===id);
+          if(!item)return false;
+          item.name=(name||"").trim()||item.name;
+          item.updatedAt=Date.now();
+          await setSaveSlots(slots);
+          return true;
+        }
+
+        async function deleteSaveSlot(id){
+          const slots=(await getSaveSlots()).filter(x=>x.id!==id);
+          await setSaveSlots(slots);
+        }
+
+        async function restoreSaveSlot(id){
+          const slots=await getSaveSlots();
+          const item=slots.find(x=>x.id===id);
+          if(!item?.snapshot)return false;
+          const restored=cloneData(item.snapshot);
+          // 读取命名存档 = 回到同一场婚礼的该时刻，不额外复制一场婚礼。
+          restored.id=item.sourceArchiveId||restored.id||uid();
+          restored.savedAt=Date.now();
+          state.archive=restored;
+          const list=(await safeGet(storage,"marriageArchives",[])).filter(x=>x.id!==restored.id);
+          list.push(restored);
+          state.archives=list;
+          await storage.set("marriageArchives",list);
+          await storage.set("currentMarriageId",restored.id);
+          await loadBase();
+          return true;
+        }
+
+        function showRenameSlotSheet(slotId,currentName=""){
+          root.querySelector(".hj-rename-sheet")?.remove();
+          const s=document.createElement("div");
+          s.className="hj-rename-sheet";
+          s.innerHTML=`<div class="hj-rename-title">为这份存档题名</div>
+            <input class="hj-save-name-input" id="hj-rename-slot-input" value="${esc(currentName)}" placeholder="例如：揭盖以后 · 只说了两句话">
+            <div class="hj-save-actions" style="margin-top:12px">
+              <button class="hj-secondary" data-action="cancel-rename-slot-v10">取消</button>
+              <button class="hj-primary" data-action="confirm-rename-slot-v10" data-slot="${esc(slotId)}">保存名字</button>
+            </div>`;
+          root.querySelector(".hj-shell").appendChild(s);
+          bind();
+          setTimeout(()=>s.querySelector("input")?.focus(),40);
+        }
+
+        async function showSaveSheet() {
           root.querySelector(".hj-save-sheet")?.remove();
           if(!state.archive) return toast("当前还没有可保存的婚礼");
           const a=state.archive;
+          const all=await getSaveSlots();
+          const slots=all.filter(x=>x.sourceArchiveId===a.id).sort((x,y)=>(y.updatedAt||0)-(x.updatedAt||0));
+          const liveProgress=currentStoryProgress(a);
           const s=document.createElement("div");
           s.className="hj-save-sheet";
           s.innerHTML=`<div class="hj-save-sheet-title">嘉 礼 存 档</div>
+            <div class="hj-save-title-note">将这一刻另外珍藏，日后可以从这里继续。</div>
             <div class="hj-save-row"><div class="hj-save-label">当前礼程</div><div class="hj-save-value">${esc(stageDisplayName(a.directorStage))}</div></div>
-            <div class="hj-save-row"><div class="hj-save-label">最近保存</div><div class="hj-save-value">${esc(formatSavedTime(a.savedAt))}</div></div>
-            <div class="hj-save-row"><div class="hj-save-label">新人</div><div class="hj-save-value">${esc(a.userMarriageName||userName())} · ${esc(a.partnerMarriageName||partnerName())}</div></div>
-            <div class="hj-save-actions">
-              <button class="hj-secondary" data-action="close-save-v85">返回婚礼</button>
-              <button class="hj-primary" data-action="save-now-v85">保存当前进度</button>
+            <div class="hj-save-row"><div class="hj-save-label">当前剧情</div><div class="hj-save-value">${liveProgress.count?`连续续写 ${liveProgress.count} 段`:"已自动保存至当前进度"}</div></div>
+
+            <div class="hj-save-create">
+              <input class="hj-save-name-input" id="hj-new-slot-name" placeholder="${esc(defaultSlotName(a))}">
+              <div class="hj-save-actions" style="margin-top:11px">
+                <button class="hj-secondary" data-action="close-save-v85">返回婚礼</button>
+                <button class="hj-primary" data-action="create-save-slot-v10">另存这一刻</button>
+              </div>
+            </div>
+
+            <div class="hj-save-row" style="margin-top:4px"><div class="hj-save-label">已珍藏</div><div class="hj-save-value">${slots.length} 份</div></div>
+            <div class="hj-slot-list">
+              ${slots.length?slots.map(slot=>{
+                const snap=slot.snapshot||{};
+                const p=currentStoryProgress(snap);
+                return `<div class="hj-slot">
+                  <div class="hj-slot-head">
+                    <div class="hj-slot-name">${esc(slot.name||"未题名")}</div>
+                    <div class="hj-slot-stage">${esc(stageDisplayName(slot.stage||snap.directorStage))}</div>
+                  </div>
+                  <div class="hj-slot-meta">${esc(formatSavedTime(slot.updatedAt||slot.createdAt))}${p.count?` · 连续剧情 ${p.count} 段`:""}</div>
+                  ${p.preview?`<div class="hj-slot-preview">${esc(p.preview)}</div>`:""}
+                  <div class="hj-slot-actions">
+                    <button class="hj-primary" data-action="load-save-slot-v10" data-slot="${esc(slot.id)}">从这里继续</button>
+                    <button class="hj-secondary" data-action="rename-save-slot-v10" data-slot="${esc(slot.id)}" data-name="${esc(slot.name||"")}">改名</button>
+                    <button class="hj-secondary" data-action="delete-save-slot-v10" data-slot="${esc(slot.id)}">删除</button>
+                  </div>
+                </div>`;
+              }).join(""):`<div class="hj-slot-empty">还没有单独题名的存档。<br>在喜欢的剧情节点，给这一刻留一个名字吧。</div>`}
             </div>`;
           root.querySelector(".hj-shell").appendChild(s);
+          bind();
+        }
+
+        function archiveStatusText(a){
+          if(a?.completedAt||a?.status==="married")return "礼成";
+          return stageDisplayName(a?.directorStage);
+        }
+
+        function timelinePush(arr,title,copy,note=""){
+          const text=String(copy||"").trim();
+          if(text)arr.push({title,copy:text,note});
+        }
+
+        function buildWeddingTimeline(a){
+          const t=[];
+          if(!a)return t;
+
+          timelinePush(t,"婚书初立",
+            `${a.userMarriageName||"卿"} · ${a.partnerMarriageName||"良人"}\n${a.weddingDate?`婚期：${a.weddingDate}`:""}`.trim());
+
+          timelinePush(t,"大婚前夜",a.preNightLine||a.preCustomLine);
+          timelinePush(t,"婚前笺",a.preLetter,a.partnerMarriageName||"");
+          timelinePush(t,"他那一夜",a.groomNightLine);
+          timelinePush(t,"迎亲",a.processionLine);
+
+          const door=[];
+          if(a.doorAnswer1)door.push(`第一问 · 今日为何而来？\n${a.partnerMarriageName||"他"}：${a.doorAnswer1}`);
+          else if(a.doorCustomAnswer1||a.doorCustomAnswer)door.push(`第一问 · ${a.doorCustomQuestion1||a.doorCustomQuestion||"自定义"}\n${a.partnerMarriageName||"他"}：${a.doorCustomAnswer1||a.doorCustomAnswer}`);
+          if(a.doorAnswer2)door.push(`第二问 · 此后愿如何待我？\n${a.partnerMarriageName||"他"}：${a.doorAnswer2}`);
+          else if(a.doorCustomAnswer2)door.push(`第二问 · ${a.doorCustomQuestion2||"自定义"}\n${a.partnerMarriageName||"他"}：${a.doorCustomAnswer2}`);
+          timelinePush(t,"朱门叩问",door.join("\n\n"));
+
+          timelinePush(t,"却扇相见",a.firstLook);
+          timelinePush(t,"执手出阁",a.handLine);
+          timelinePush(t,"扶送上轿",a.sedanBoardingLine);
+          timelinePush(t,"花轿归程",a.sedanLine);
+          timelinePush(t,"迎卿下轿",a.arrivalLine);
+
+          if(a.bowDone||a.bowStep) timelinePush(t,"拜堂",a.bowLine||"三拜既成，彼此相向。");
+          timelinePush(t,"沃盥",a.washLine);
+          timelinePush(t,"同牢",a.tonglaoLine,a.tonglaoFood?`所取礼食：${a.tonglaoFood}`:"");
+          timelinePush(t,"合卺",a.hejinLine);
+          timelinePush(t,"结发",a.hairLine);
+
+          const vows=[];
+          if(a.vowUser)vows.push(`${a.userMarriageName||"卿"}：${a.vowUser}`);
+          if(a.vowPartner)vows.push(`${a.partnerMarriageName||"良人"}：${a.vowPartner}`);
+          if(a.vowReaction)vows.push(a.vowReaction);
+          timelinePush(t,"婚誓",vows.join("\n\n"));
+
+          timelinePush(t,"婚书双印",a.partnerSealLine,a.marriageNo?`婚书编号：${a.marriageNo}`:"");
+          timelinePush(t,"正礼告成",a.afterCeremonyLine);
+          timelinePush(t,"暂归喜房",a.bridalEntryLine);
+          timelinePush(t,"揭盖头",a.veilLine);
+
+          const rest=Array.isArray(a.bridalRestStory)?a.bridalRestStory:[];
+          if(rest.length){
+            timelinePush(t,"喜房暂歇",rest.map(x=>`${x.label?`【${x.label}】\n`:""}${x.text||""}`).join("\n\n"));
+          }else{
+            timelinePush(t,"喜房暂歇",a.bridalRestLine);
+          }
+
+          timelinePush(t,"重入喜宴",a.banquetEntryLine);
+          timelinePush(t,"喜宴",a.banquetLine);
+          timelinePush(t,"席散",a.banquetEndLine);
+          timelinePush(t,"执手归房",a.returnRoomLine);
+
+          const night=Array.isArray(a.nightStory)?a.nightStory:[];
+          if(night.length){
+            timelinePush(t,"花烛夜",night.map(x=>`${x.label?`【${x.label}】\n`:""}${x.text||""}`).join("\n\n"));
+          }else{
+            timelinePush(t,"花烛夜",a.nightLine);
+          }
+
+          timelinePush(t,"嘉礼落幕",a.finalBlessing);
+          return t;
+        }
+
+        async function renderJialiRecordV10(){
+          await loadBase();
+          music.play("afterglow",.24);
+          const archives=(state.archives||[]).slice().sort((a,b)=>(b.completedAt||b.savedAt||0)-(a.completedAt||a.savedAt||0));
+          view.innerHTML=`<div class="hj-record-page">
+            ${musicTop("嘉礼录","home")}
+            <div class="hj-record-hero">
+              <div class="hj-record-seal">录</div>
+              <div class="hj-record-title">嘉礼录</div>
+              <div class="hj-record-sub">良 辰 有 记 · 嘉 礼 有 藏</div>
+              <div class="hj-record-count">共收录 ${archives.length} 场嘉礼</div>
+            </div>
+            <div class="hj-record-cards">
+              ${archives.length?archives.map(a=>{
+                const p=currentStoryProgress(a);
+                return `<button class="hj-record-card" data-action="open-jiali-scroll-v10" data-id="${esc(a.id)}">
+                  <div class="hj-record-card-top">
+                    <div class="hj-record-names">${esc(a.userMarriageName||"卿")} · ${esc(a.partnerMarriageName||"良人")}</div>
+                    <div class="hj-record-status">${esc(archiveStatusText(a))}</div>
+                  </div>
+                  <div class="hj-record-date">${esc(a.weddingDate||formatSavedTime(a.createdAt).split(" ")[0])}</div>
+                  <div class="hj-record-progress">已收录至「${esc(stageDisplayName(a.directorStage))}」${p.count?`，其中连续剧情 ${p.count} 段。`:"。"}</div>
+                  <div class="hj-record-open">展开这卷嘉礼 ›</div>
+                </button>`;
+              }).join(""):`<div class="hj-scroll-empty">嘉礼尚未启卷。<br>当第一场婚礼开始以后，这里会自动留下它走过的每一步。</div>`}
+            </div>
+          </div>`;
+          bind();
+        }
+
+        function renderJialiScrollV10(id){
+          const a=(state.archives||[]).find(x=>x.id===id);
+          if(!a)return renderJialiRecordV10();
+          const timeline=buildWeddingTimeline(a);
+          view.innerHTML=`<div class="hj-scroll-page">
+            ${musicTop("嘉礼长卷","jialirecord")}
+            <div class="hj-scroll-cover">
+              <div class="hj-scroll-kicker">${a.completedAt?"嘉 礼 已 成":"嘉 礼 未 竟"}</div>
+              <div class="hj-scroll-names">${esc(a.userMarriageName||"卿")} · ${esc(a.partnerMarriageName||"良人")}</div>
+              <div class="hj-scroll-date">${esc(a.weddingDate||formatSavedTime(a.createdAt).split(" ")[0])}</div>
+            </div>
+            <div class="hj-scroll-line"></div>
+            ${timeline.length?timeline.map((x,i)=>`
+              <section class="hj-scroll-section">
+                <div class="hj-scroll-section-title">${esc(x.title)}</div>
+                <div class="hj-scroll-section-copy">${esc(x.copy)}</div>
+                ${x.note?`<div class="hj-scroll-section-note">${esc(x.note)}</div>`:""}
+              </section>
+              ${i<timeline.length-1?`<div class="hj-scroll-line" style="height:18px"></div>`:""}
+            `).join(""):`<div class="hj-scroll-empty">这一卷才刚刚开始。继续走下去，发生过的剧情会自动收进这里。</div>`}
+          </div>`;
           bind();
         }
 
@@ -2283,6 +2717,10 @@
                 <div class="hj-v5-cover-title">合卺书</div>
                 <div class="hj-v5-cover-sub">${esc(state.archive.userMarriageName||userName())} · ${esc(state.archive.partnerMarriageName||partnerName())}　成婚第 ${daysSince(state.archive.completedAt)} 日</div>
                 <button class="hj-primary" data-action="resume-married">重看嘉礼落幕</button>
+                <button class="hj-record-entry" data-action="open-jiali-record-v10">
+                  <div class="hj-record-entry-title">嘉礼录</div>
+                  <div class="hj-record-entry-sub">良辰有记 · 嘉礼有藏　›</div>
+                </button>
                 <div style="height:10px"></div>
                 <button class="hj-secondary" data-action="new-marriage">另启一卷</button>
               </div>
@@ -2297,8 +2735,17 @@
               <div class="hj-v5-cover-title">合卺书</div>
               <div class="hj-v5-cover-sub">${state.archive?.partnerId ? "大婚未竟 · 嘉礼待续" : "吉期既定 · 嘉礼将启"}</div>
               ${state.archive?.partnerId
-                ? `<button class="hj-primary" data-action="resume-wedding">继续上次嘉礼</button>${state.archive?.savedAt?`<div class="hj-save-hint">进度已自动珍藏</div>`:""}<div style="height:10px"></div><button class="hj-secondary" data-action="new-marriage">另启新婚</button>`
-                : `<button class="hj-primary" data-action="new-marriage">启书</button>`}
+                ? `<button class="hj-primary" data-action="resume-wedding">继续上次嘉礼</button>${state.archive?.savedAt?`<div class="hj-save-hint">进度已自动珍藏</div>`:""}
+                   <button class="hj-record-entry" data-action="open-jiali-record-v10">
+                     <div class="hj-record-entry-title">嘉礼录</div>
+                     <div class="hj-record-entry-sub">这场婚礼已经走过的，都在这里　›</div>
+                   </button>
+                   <div style="height:10px"></div><button class="hj-secondary" data-action="new-marriage">另启新婚</button>`
+                : `<button class="hj-primary" data-action="new-marriage">启书</button>
+                   <button class="hj-record-entry" data-action="open-jiali-record-v10">
+                     <div class="hj-record-entry-title">嘉礼录</div>
+                     <div class="hj-record-entry-sub">良辰有记 · 嘉礼有藏　›</div>
+                   </button>`}
             </div>
           </div>`;
           bind();
@@ -3052,7 +3499,7 @@
               if(action==="home") return renderHomeV5();
               if(action==="back"){
                 const t=el.dataset.target;
-                const map={home:renderHomeV5,choose:renderChooseV5,names:renderNamesV5,prewedding:renderPreWeddingV5,procession:renderProcessionV5,door:()=>renderDoorV5(),fan:()=>renderFanV5(2),hand:renderHandV5,sedan:renderSedanV5,arrival:renderArrivalV5,hall:renderHallV5,bow:renderBowV7,wash:()=>renderWashV5(true),tonglao:()=>renderTonglaoV5(state.archive?.tonglaoFood||""),hejin:()=>renderHejinV5(true),hair:renderHairV5,vows:renderVowsV5,book:()=>renderBookV5("done"),complete:renderCeremonyCompleteV5,bridalentry:renderBridalEntryV9,veil:renderVeilLiftV6,bridalrest:renderBridalRestV9,banquetentry:renderBanquetEntryV8,banquet:renderBanquetV5,banquetend:renderBanquetEndV8,returnroom:renderReturnRoomV8,night:renderNightV5,finale:renderFinaleV8};
+                const map={home:renderHomeV5,jialirecord:renderJialiRecordV10,choose:renderChooseV5,names:renderNamesV5,prewedding:renderPreWeddingV5,procession:renderProcessionV5,door:()=>renderDoorV5(),fan:()=>renderFanV5(2),hand:renderHandV5,sedan:renderSedanV5,arrival:renderArrivalV5,hall:renderHallV5,bow:renderBowV7,wash:()=>renderWashV5(true),tonglao:()=>renderTonglaoV5(state.archive?.tonglaoFood||""),hejin:()=>renderHejinV5(true),hair:renderHairV5,vows:renderVowsV5,book:()=>renderBookV5("done"),complete:renderCeremonyCompleteV5,bridalentry:renderBridalEntryV9,veil:renderVeilLiftV6,bridalrest:renderBridalRestV9,banquetentry:renderBanquetEntryV8,banquet:renderBanquetV5,banquetend:renderBanquetEndV8,returnroom:renderReturnRoomV8,night:renderNightV5,finale:renderFinaleV8};
                 return (map[t]||renderHomeV5)();
               }
               if(action==="toggle-main-memory-v8"){
@@ -3114,14 +3561,73 @@
                 });
                 return renderProcessionV5();
               }
-              if(action==="open-save-v85") return showSaveSheet();
+              if(action==="open-save-v85") return await showSaveSheet();
               if(action==="close-save-v85") return el.closest(".hj-save-sheet")?.remove();
-              if(action==="save-now-v85"){
-                await saveArchive({});
-                toast("嘉礼进度已保存");
-                el.closest(".hj-save-sheet")?.remove();
-                return;
+
+              if(action==="create-save-slot-v10"){
+                const name=root.querySelector("#hj-new-slot-name")?.value.trim()||"";
+                await createNamedSave(name);
+                toast("这一刻已经珍藏");
+                return await showSaveSheet();
               }
+              if(action==="rename-save-slot-v10"){
+                return showRenameSlotSheet(el.dataset.slot||"",el.dataset.name||"");
+              }
+              if(action==="cancel-rename-slot-v10"){
+                return el.closest(".hj-rename-sheet")?.remove();
+              }
+              if(action==="confirm-rename-slot-v10"){
+                const input=root.querySelector("#hj-rename-slot-input")?.value.trim()||"";
+                await renameSaveSlot(el.dataset.slot||"",input);
+                root.querySelector(".hj-rename-sheet")?.remove();
+                toast("存档名字已改好");
+                return await showSaveSheet();
+              }
+              if(action==="delete-save-slot-v10"){
+                await deleteSaveSlot(el.dataset.slot||"");
+                toast("这份存档已删除");
+                return await showSaveSheet();
+              }
+              if(action==="load-save-slot-v10"){
+                const ok=await restoreSaveSlot(el.dataset.slot||"");
+                root.querySelector(".hj-save-sheet")?.remove();
+                if(!ok)return toast("这份存档暂时无法读取");
+                toast("已经回到这份存档");
+                const s=state.archive?.directorStage||"prewedding";
+                switch(s){
+                  case "choose": return renderChooseV5();
+                  case "names": return renderNamesV5();
+                  case "prewedding": return renderPreWeddingV5();
+                  case "procession": return renderProcessionV5();
+                  case "door": return renderDoorV5();
+                  case "fan": return renderFanV5(state.archive?.firstLook?2:0);
+                  case "hand": return renderHandV5();
+                  case "sedan": return renderSedanV5();
+                  case "arrival": return renderArrivalV5();
+                  case "hall": return renderHallV5();
+                  case "bow": return renderBowV7();
+                  case "wash": return renderWashV5(!!state.archive?.washDone);
+                  case "tonglao": return renderTonglaoV5(state.archive?.tonglaoFood||"");
+                  case "hejin": return renderHejinV5(!!state.archive?.hejinDone);
+                  case "hair": return renderHairV5();
+                  case "vows": return renderVowsV5();
+                  case "book": return renderBookV5(state.archive?.partnerSealAt?"done":state.archive?.userSealAt?"partner":"user");
+                  case "complete": return renderCeremonyCompleteV5();
+                  case "bridalentry": return renderBridalEntryV9();
+                  case "veil": return renderVeilLiftV6();
+                  case "bridalrest": return renderBridalRestV9();
+                  case "banquetentry": return renderBanquetEntryV8();
+                  case "banquet": return renderBanquetV5();
+                  case "banquetend": return renderBanquetEndV8();
+                  case "returnroom": return renderReturnRoomV8();
+                  case "night": return renderNightV5();
+                  case "finale": return renderFinaleV8();
+                  default:return renderHomeV5();
+                }
+              }
+
+              if(action==="open-jiali-record-v10") return renderJialiRecordV10();
+              if(action==="open-jiali-scroll-v10") return renderJialiScrollV10(el.dataset.id||"");
               if(action==="new-marriage") return createNewMarriage();
               if(action==="resume-married") return renderFinaleV8();
               if(action==="resume-wedding"){
