@@ -1,8 +1,8 @@
 {
   "id": "hejingshu",
   "name": "合卺书",
-  "version": "0.5.0",
-  "description": "《合卺书》嘉礼重构版：参与式亲迎、却扇、沃盥、同牢、合卺、结发、婚誓、双印、礼成、喜宴、花烛与岁岁帖；接入跨场景音乐系统。",
+  "version": "0.8.2",
+  "description": "《合卺书》嘉礼流程精修版：朱门双问与自定义叩问、下轿剧情、正礼与喜宴互动、席散归房、花烛落幕、独立终章音乐，并支持用户选择在礼成后写入 Roche 主记忆。",
   "author": "linyin8945",
   "entry": "https://raw.githubusercontent.com/linyin8945/hejingshu/main/hejingshu.js",
   "hash": "",
@@ -10,6 +10,7 @@
     "persona:read",
     "character:read",
     "memory:read",
+    "memory:write",
     "ai:chat",
     "storage",
     "ui"
