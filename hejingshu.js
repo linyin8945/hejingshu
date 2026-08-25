@@ -3,7 +3,7 @@
 
   const PLUGIN_ID = "hejingshu";
   const APP_ID = "hejingshu-home";
-  const VERSION = "0.9.0";
+  const VERSION = "0.9.1";
 
   const GOLD = "#D6B56A";
   const DEEP_RED = "#6F0D14";
@@ -1157,6 +1157,23 @@
 .hj-save-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 .hj-save-actions .hj-primary,.hj-save-actions .hj-secondary{width:100%;padding-left:10px;padding-right:10px}
 
+.hj-film-content.hj-continuous-content{
+  max-height:64% !important; overflow-y:auto !important; overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch !important; touch-action:pan-y !important;
+  overscroll-behavior-y:contain; scroll-behavior:smooth; padding-top:18px !important;
+}
+.hj-film-content.hj-continuous-content .hj-film-line{max-height:none !important;overflow:visible !important}
+.hj-story-flow{display:flex;flex-direction:column;gap:15px}
+.hj-story-flow-intro{color:#f2e2bf;line-height:2}
+.hj-story-turn{border-top:1px solid rgba(232,202,132,.20);padding-top:13px;animation:hjStoryAppear .28s ease both}
+.hj-story-turn-tag{margin-bottom:6px;color:#dbc17e;font-size:10px;letter-spacing:.18em}
+.hj-story-turn-text{color:#f4e7ca;line-height:2;white-space:pre-line}
+.hj-story-flow-end{height:2px}
+.hj-continuous-actions{
+  position:sticky;bottom:-2px;z-index:5;padding-top:12px;padding-bottom:2px;
+  background:linear-gradient(180deg,rgba(55,5,8,0),rgba(55,5,8,.78) 28%,rgba(55,5,8,.94));
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)
+}
 </style>`;
   }
 
@@ -1395,6 +1412,39 @@
         }
 
 
+
+        function storyTurns(key){
+          const a=state.archive||{};
+          return Array.isArray(a[key])?a[key]:[];
+        }
+        function storyFlowHtml(intro,turns){
+          const items=(turns||[]).map((turn,i)=>`
+            <div class="hj-story-turn">
+              <div class="hj-story-turn-tag">${esc(turn.label||`续篇 ${i+1}`)}</div>
+              <div class="hj-story-turn-text">${esc(turn.text||"")}</div>
+            </div>`).join("");
+          return `<div class="hj-story-flow"><div class="hj-story-flow-intro">${esc(intro)}</div>${items}<div class="hj-story-flow-end"></div></div>`;
+        }
+        function storyContext(turns,maxTurns=6){
+          return (turns||[]).slice(-maxTurns).map((t,i)=>`【前文${i+1}｜${t.label||"互动"}】\n${t.text||""}`).join("\n\n");
+        }
+        async function appendStoryTurn(key,label,text,stage){
+          const turns=storyTurns(key).slice();
+          turns.push({id:Date.now()+"-"+Math.random().toString(36).slice(2,7),label,text,at:Date.now()});
+          await saveArchive({[key]:turns,directorStage:stage});
+          return turns;
+        }
+        function enableContinuousStoryScroll(){
+          const content=view.querySelector(".hj-film-content");
+          if(!content)return;
+          content.classList.add("hj-continuous-content");
+          content.querySelector(".hj-film-actions")?.classList.add("hj-continuous-actions");
+          requestAnimationFrame(()=>{
+            const end=content.querySelector(".hj-story-flow-end");
+            end?.scrollIntoView({block:"nearest",behavior:"smooth"});
+          });
+        }
+
         const CUSTOM_SCENE_CONFIG = {
           prewedding: {
             title:"这一夜，你想……",
@@ -1460,7 +1510,7 @@
             title:"入宴这一刻，你想……",
             saveKey:"banquetEntryLine",
             rerender:"banquetentry",
-            task:(input)=>`中式婚礼正礼结束，新人与亲友一道转入喜宴。USER选择：“${input}”。写一段入宴现场剧情：礼乐重新热闹、宾客说笑、朋友举杯，但不要刻意写手机、摄影设备或工作人员；焦点仍在 USER 与${partnerDisplayName()}。`
+            task:(input)=>`中式婚礼正礼已结束，红盖头也已在喜房中揭下。USER与${partnerDisplayName()}稍作整装后重新走回满堂灯火，准备进入喜宴。USER选择：“${input}”。写一段重新入宴的现场剧情：席间渐热、来宾说笑、有人举杯，但不要刻意写手机、摄影设备或工作人员；焦点仍在二人重新并肩走进人群。`
           },
           banquet: {
             title:"喜宴席间，你想……",
@@ -1526,16 +1576,16 @@
         }
 
 
-        function showDoorQuestionSheet() {
+        function showDoorQuestionSheet(round=1) {
           root.querySelector(".hj-custom-sheet")?.remove();
           const s=document.createElement("div");
           s.className="hj-custom-sheet hj-door-custom-sheet";
-          s.innerHTML=`<div class="hj-custom-sheet-title">朱门一问</div>
+          s.innerHTML=`<div class="hj-custom-sheet-title">朱门第${round===1?"一":"二"}问</div>
             <div class="hj-custom-sheet-copy">这一问由你来定。只问真正想听他回答的话。</div>
             <textarea id="hj-door-custom-question" placeholder="你想隔着门问他什么？"></textarea>
             <div class="hj-custom-sheet-actions">
               <button class="hj-secondary" data-action="close-custom-v8">取消</button>
-              <button class="hj-primary" data-action="submit-door-custom-v82">问他</button>
+              <button class="hj-primary" data-action="submit-door-custom-v91" data-round="${round}">问他</button>
             </div>`;
           root.querySelector(".hj-shell").appendChild(s);
           bind();
@@ -1545,9 +1595,12 @@
         function doorDialogueText(a) {
           const pname=a.partnerMarriageName||partnerName();
           const lines=[];
+          const legacyQ=a.doorCustomQuestion||"";
+          const legacyA=a.doorCustomAnswer||"";
           if(a.doorAnswer1) lines.push(`第一问 · 今日为何而来？\n${pname}：${a.doorAnswer1}`);
+          else if(a.doorCustomAnswer1||legacyA) lines.push(`第一问 · ${a.doorCustomQuestion1||legacyQ||"由你亲自问他"}\n${pname}：${a.doorCustomAnswer1||legacyA}`);
           if(a.doorAnswer2) lines.push(`第二问 · 此后漫长岁月，你愿如何待我？\n${pname}：${a.doorAnswer2}`);
-          if(a.doorCustomQuestion && a.doorCustomAnswer) lines.push(`你问：${a.doorCustomQuestion}\n${pname}：${a.doorCustomAnswer}`);
+          else if(a.doorCustomAnswer2) lines.push(`第二问 · ${a.doorCustomQuestion2||"由你亲自问他"}\n${pname}：${a.doorCustomAnswer2}`);
           return lines.join("\n\n");
         }
 
@@ -2354,24 +2407,28 @@
         function renderDoorV5() {
           const a=state.archive||{};
           const dialogue=doorDialogueText(a);
-          const answeredCount=[a.doorAnswer1,a.doorAnswer2,a.doorCustomAnswer].filter(Boolean).length;
-          const q1=!!a.doorAnswer1;
-          const q2=!!a.doorAnswer2;
-          const qc=!!a.doorCustomAnswer;
-          let buttons=[];
-          if(!q1) buttons.push(`<button class="hj-primary" data-action="door-q1-v82">第一问 · 今日为何而来？</button>`);
-          if(!q2) buttons.push(`<button class="hj-primary" data-action="door-q2-v82">第二问 · 此后愿如何待我？</button>`);
-          if(!qc) buttons.push(`<button class="hj-secondary" data-action="door-custom-v82">自定义一问</button>`);
-          if(answeredCount>=2) buttons.push(`<button class="hj-primary" data-action="door-open-v5">两问既答 · 开门见他</button>`);
-          const actions=`<div class="hj-door-questions">${buttons.join("")}</div>`;
-
+          const firstDone=!!(a.doorAnswer1||a.doorCustomAnswer1||a.doorCustomAnswer);
+          const secondDone=!!(a.doorAnswer2||a.doorCustomAnswer2);
+          const round=secondDone?3:firstDone?2:1;
+          let actions="";
+          if(round===1){
+            actions=`<div class="hj-door-questions">
+              <button class="hj-primary" data-action="door-q1-v82">第一问 · 今日为何而来？</button>
+              <button class="hj-secondary" data-action="door-custom-v91" data-round="1">自定义第一问</button>
+            </div>`;
+          }else if(round===2){
+            actions=`<div class="hj-door-questions">
+              <button class="hj-primary" data-action="door-q2-v82">第二问 · 此后愿如何待我？</button>
+              <button class="hj-secondary" data-action="door-custom-v91" data-round="2">自定义第二问</button>
+            </div>`;
+          }else{
+            actions=`<div class="hj-door-questions"><button class="hj-primary" data-action="door-open-v5">两问既答 · 开门见他</button></div>`;
+          }
           view.innerHTML=filmShell({
             asset:"pickupDoor",title:"朱门叩问",kicker:"亲 迎",
-            line:dialogue || "门没有立刻打开。门里的人声轻了一点，门外也安静下来。今日这一门，不问礼数，只问真心。",
-            help:"朱门叩问：这一关只需完成任意两问即可开门。你可以回答两道内置问题，也可以用自定义问题替代其中任意一道；自定义问题同样计入两问，不会再强迫你补答内置题。",
-            actions,
-            back:"procession",
-            extra:""
+            line:dialogue||"门没有立刻打开。门里的人声轻了一点，门外也安静下来。今日这一门，不问礼数，只问真心。",
+            help:"朱门叩问共两问。每一问都可以选择内置问题，也可以用自定义问题替代；完成第一问后只进入第二问，不会重复上一问。",
+            actions,back:"procession",extra:""
           });
           bind();
         }
@@ -2705,30 +2762,30 @@
 
         function renderBridalRestV9() {
           music.play("afterglow",.20);
-          const a=state.archive||{};
+          const turns=storyTurns("bridalRestStory");
+          const intro=`红盖头已经安静地搁在一旁。短暂的独处之后，外面的灯火与人声仍隔着门扉。喜宴还没有真正开始，你们可以在这里多停一会儿。`;
           view.innerHTML=filmShell({
             asset:"bridalRoomAlt",title:"整装赴宴",kicker:"盖 头 已 揭 · 喜 宴 将 开",
-            line:a.bridalRestLine
-              ? esc(a.bridalRestLine)
-              : `红盖头已经安静地搁在一旁。短暂的独处之后，外面的灯火与人声重新近了些。今日还没有结束——接下来，你们要并肩回到席间。`,
-            actions:`<button class="hj-secondary" data-action="bridal-rest-sit-v90">与他静坐片刻</button>
-                     <button class="hj-secondary" data-action="bridal-rest-ask-v90">问他方才在想什么</button>
+            line:storyFlowHtml(intro,turns),
+            actions:`<button class="hj-secondary" data-action="bridal-rest-sit-v91">与他静坐片刻</button>
+                     <button class="hj-secondary" data-action="bridal-rest-ask-v91">问他方才在想什么</button>
+                     <button class="hj-secondary" data-action="bridal-rest-near-v91">靠近他一些</button>
                      ${customButton("bridalrest")}
                      <button class="hj-primary" data-action="to-banquet-entry-v90">整装既毕 · 携手赴宴</button>`,
-            back:"veil",
-            extra:""
+            back:"veil",extra:""
           });
           bind();
+          enableContinuousStoryScroll();
         }
 
         function renderBanquetEntryV8() {
           music.play("procession",.28);
           const a=state.archive||{};
           view.innerHTML=filmShell({
-            asset:"banquetHall",title:"入宴",kicker:"礼 成 · 灯 火 重 起",
+            asset:"banquetHall",title:"入宴",kicker:"重 入 满堂 · 喜 宴 将 开",
             line:a.banquetEntryLine
               ? esc(a.banquetEntryLine)
-              : "司礼退到一旁，乐声重新响起。刚才还安静观礼的宾客一下有了笑声，朋友们也渐渐围了过来。",
+              : `红盖头已经揭下。稍作整装后，你们重新推开房门。方才被门扉隔远的灯火与笑声一下近了起来，席间已渐渐热闹。${esc(partnerDisplayName())} 就在你身侧，短暂属于两个人的安静过去以后，你们重新一起走进满堂灯火。`,
             actions:`<button class="hj-secondary" data-action="banquet-entry-look-v8">看看席间都在做什么</button>
                      <button class="hj-secondary" data-action="banquet-entry-char-v8">看他怎么应付朋友</button>
                      ${customButton("banquetentry")}
@@ -2819,18 +2876,20 @@
 
         function renderNightV5() {
           music.play("afterglow",.30);
-          const a=state.archive||{};
+          const turns=storyTurns("nightStory");
+          const intro=`门扉合上，外面的喜宴声一点点远去。今日所有需要完成的礼都已经走完。此刻没有下一礼，也没有人再催促——只剩你们两个。`;
           view.innerHTML=filmShell({
             asset:"bridalRoom",title:"花烛",kicker:"只 剩 你 们",
-            line:a.nightLine?esc(a.nightLine):"门合上，外面的喜宴声一点点远去。婚礼结束以后，终于只剩你们两个人。",
-            actions:`<button class="hj-secondary" data-action="night-question">问他：今天什么时候最紧张？</button>
-                     <button class="hj-secondary" data-action="night-look">问他：今天最想记住哪一刻？</button>
-                     <button class="hj-secondary" data-action="night-future">问他：婚后最想一起做什么？</button>
-                     ${customButton("night")}<button class="hj-primary" data-action="finish-wedding-v8">今夜至此 · 礼成</button>`,
-            back:"returnroom",
-            extra:storyCard("花 烛 · 私 语",a.nightLine,"48%")
+            line:storyFlowHtml(intro,turns),
+            actions:`<button class="hj-secondary" data-action="night-question-v91">问他：今天什么时候最紧张？</button>
+                     <button class="hj-secondary" data-action="night-look-v91">问他：今天最想记住哪一刻？</button>
+                     <button class="hj-secondary" data-action="night-future-v91">问他：婚后最想一起做什么？</button>
+                     ${customButton("night")}
+                     <button class="hj-primary" data-action="finish-wedding-v8">今夜至此 · 礼成</button>`,
+            back:"returnroom",extra:""
           });
           bind();
+          enableContinuousStoryScroll();
         }
 
         async function ensureFinalBlessing() {
@@ -2928,6 +2987,7 @@
             veilLine: "",
             veilOpened: false,
             nightLine: "",
+            nightStory: [],
             morningLine: "",
             vowReaction: "",
             partnerSealLine: "",
@@ -3006,6 +3066,23 @@
                 const cfg=CUSTOM_SCENE_CONFIG[stage];
                 const input=root.querySelector("#hj-custom-input")?.value.trim();
                 if(!cfg||!input)return toast("先写下这一刻你想做什么");
+
+                if(stage==="bridalrest" || stage==="night"){
+                  const key=stage==="bridalrest"?"bridalRestStory":"nightStory";
+                  const turns=storyTurns(key);
+                  const ctx=storyContext(turns,6);
+                  const phase=stage==="bridalrest"
+                    ? `红盖头已经揭下，喜宴尚未开始，USER与${partnerDisplayName()}仍在喜房里短暂独处。`
+                    : `喜宴已经结束，两人已经归房。今天所有礼仪都完成了，房里只剩 USER 与${partnerDisplayName()}。`;
+                  await withGenerateButton(el,"正在续写这一刻",async()=>{
+                    const t=await weddingSceneText(
+                      `${phase}\n\n${ctx?`以下是这一场景已经发生的连续前文，请严格接着它往下写，不要重新开场，也不要重复已经发生的动作：\n${ctx}\n\n`:""}USER此刻选择：“${input}”。请直接续写下一段剧情，让${partnerDisplayName()}自然回应。不要总结前文，不要跳时间，不要擅自结束场景。`,220);
+                    await appendStoryTurn(key,`自定义 · ${input}`,t,stage);
+                  });
+                  root.querySelector(".hj-custom-sheet")?.remove();
+                  return renderStageByName(stage);
+                }
+
                 await withGenerateButton(el,"正在写入这一刻",async()=>{
                   const t=await weddingSceneText(cfg.task(input),190);
                   await saveArchive({[cfg.saveKey]:t,directorStage:cfg.rerender});
@@ -3135,7 +3212,7 @@
                     `迎亲已到朱门前。门里的人问新郎：“今日为何而来？”请只写新郎真正说出口的回答，不要动作旁白，不要模板古风，不要夸张誓言。必须贴合他原本人设、与 USER 的真实关系，并明确回答为什么今天愿意与她成婚。`,
                     150
                   );
-                  await saveArchive({doorAnswer1:stripStageDirections(t),directorStage:"door"});
+                  await saveArchive({doorAnswer1:stripStageDirections(t),doorRound:2,directorStage:"door"});
                 });
                 return renderDoorV5();
               }
@@ -3145,20 +3222,24 @@
                     `迎亲朱门第二问。门里问新郎：“此后漫长岁月，你愿如何待我？”请只写新郎真正说出口的回答。不要套用古风誓词，不要空泛承诺“永远不会让你受委屈”；要用符合他本人性格的语言，回答婚后具体愿意如何尊重、陪伴、商量、承担与过日子。`,
                     180
                   );
-                  await saveArchive({doorAnswer2:stripStageDirections(t),directorStage:"door"});
+                  await saveArchive({doorAnswer2:stripStageDirections(t),doorRound:3,directorStage:"door"});
                 });
                 return renderDoorV5();
               }
-              if(action==="door-custom-v82") return showDoorQuestionSheet();
-              if(action==="submit-door-custom-v82"){
+              if(action==="door-custom-v82" || action==="door-custom-v91") return showDoorQuestionSheet(Number(el.dataset.round||1));
+              if(action==="submit-door-custom-v82" || action==="submit-door-custom-v91"){
                 const q=root.querySelector("#hj-door-custom-question")?.value.trim();
                 if(!q)return toast("先写下你真正想问他的问题");
+                const round=Number(el.dataset.round || (state.archive?.doorAnswer1||state.archive?.doorCustomAnswer1||state.archive?.doorCustomAnswer ? 2 : 1));
                 await withGenerateButton(el,`${partnerDisplayName()} 正在回答你`,async()=>{
                   const t=await weddingAwareText(
-                    `迎亲朱门前，USER隔着门亲自问新郎：“${q}” 请只写新郎真正说出口的回答，不要替 USER 增加动作或心理，不要模板化，要贴合他原本人设和双方关系。`,
-                    180
-                  );
-                  await saveArchive({doorCustomQuestion:q,doorCustomAnswer:stripStageDirections(t),directorStage:"door"});
+                    `迎亲朱门第${round===1?"一":"二"}问。USER隔着门亲自问新郎：“${q}” 请只写新郎真正说出口的回答，不要替 USER 增加动作或心理，不要模板化，要贴合他原本人设和双方关系。`,180);
+                  const ans=stripStageDirections(t);
+                  if(round===1){
+                    await saveArchive({doorCustomQuestion1:q,doorCustomAnswer1:ans,doorCustomQuestion:q,doorCustomAnswer:ans,doorRound:2,directorStage:"door"});
+                  }else{
+                    await saveArchive({doorCustomQuestion2:q,doorCustomAnswer2:ans,doorRound:3,directorStage:"door"});
+                  }
                 });
                 root.querySelector(".hj-custom-sheet")?.remove();
                 return renderDoorV5();
@@ -3361,13 +3442,20 @@
                 return renderVeilLiftV6();
               }
               if(action==="to-bridal-rest-v90"){await saveArchive({directorStage:"bridalrest"});return renderBridalRestV9()}
-              if(action==="bridal-rest-sit-v90"||action==="bridal-rest-ask-v90"){
-                const task=action==="bridal-rest-sit-v90"
-                  ? `红盖头已经揭下，喜宴尚未开始。USER与${partnerDisplayName()}在喜房里安静坐一小会儿。写一段短暂休息的剧情，让正礼的郑重慢慢松下来，但仍保留婚礼氛围。`
-                  : `红盖头已经揭下，喜宴尚未开始。USER问${partnerDisplayName()}：“方才揭开盖头的时候，你在想什么？”请写他的真实回答与少量动作，语言必须贴合他本人，不要模板情话。`;
-                await withGenerateButton(el,action==="bridal-rest-sit-v90"?"与你静坐片刻":"他正在想怎么回答",async()=>{
-                  const t=await weddingSceneText(task,180);
-                  await saveArchive({bridalRestLine:t,directorStage:"bridalrest"});
+              if(["bridal-rest-sit-v90","bridal-rest-ask-v90","bridal-rest-sit-v91","bridal-rest-ask-v91","bridal-rest-near-v91"].includes(action)){
+                const turns=storyTurns("bridalRestStory");
+                const ctx=storyContext(turns,6);
+                const kind=action.includes("sit")?"sit":action.includes("ask")?"ask":"near";
+                const label=kind==="sit"?"与你静坐片刻":kind==="ask"?"问他方才在想什么":"靠近他一些";
+                const instruction=kind==="sit"
+                  ? `USER没有急着赴宴，只和${partnerDisplayName()}在喜房里安静坐一小会儿。`
+                  : kind==="ask"
+                  ? `USER问${partnerDisplayName()}：“方才揭开盖头的时候，你在想什么？”`
+                  : `USER主动朝${partnerDisplayName()}靠近了一些。不要替 USER 再增加其它动作。`;
+                await withGenerateButton(el,kind==="ask"?"他正在想怎么回答":"这一刻正在继续",async()=>{
+                  const t=await weddingSceneText(
+                    `红盖头已经揭下，喜宴尚未开始，二人仍在喜房里。\n\n${ctx?`这是刚刚已经发生的连续前文，请严格接着写：\n${ctx}\n\n`:""}${instruction} 请续写下一段，保持空间、动作、情绪连续，不要重新介绍场景，不要总结，不要把剧情直接推进到赴宴。`,220);
+                  await appendStoryTurn("bridalRestStory",label,t,"bridalrest");
                 });
                 return renderBridalRestV9();
               }
@@ -3441,15 +3529,20 @@
                 return renderVeilLiftV6();
               }
               if(action==="to-night-v6"){await saveArchive({directorStage:"night"});return renderNightV5()}
-              if(action==="night-question"||action==="night-look"||action==="night-future"){
-                const task=action==="night-question"
-                  ? `花烛夜只剩你们两个人。USER问${partnerDisplayName()}：你今天什么时候最紧张？写成一小段现场剧情，动作叙述用${partnerDisplayName()}或“他”，最后给出他真正的回答。`
-                  : action==="night-look"
-                  ? `花烛夜只剩你们两个人。USER问${partnerDisplayName()}：今天最想记住哪一刻？写成一小段现场剧情，动作叙述用${partnerDisplayName()}或“他”，最后给出他真正的回答；答案可以是很小、很具体的一刻，不要空泛。`
-                  : `花烛夜只剩你们两个人。USER问${partnerDisplayName()}：成婚以后，你最想和我一起做什么？写一段安静自然的现场剧情，回答可以是一件具体寻常的小事，必须符合他本人性格，不要空泛。`;
-                await withGenerateButton(el,"他正在想怎么回答",async()=>{
-                  const t=await weddingSceneText(task,190);
-                  await saveArchive({nightLine:t,directorStage:"night"});
+              if(["night-question","night-look","night-future","night-question-v91","night-look-v91","night-future-v91"].includes(action)){
+                const turns=storyTurns("nightStory");
+                const ctx=storyContext(turns,6);
+                const kind=action.includes("question")?"question":action.includes("look")?"look":"future";
+                const label=kind==="question"?"问他：今天什么时候最紧张？":kind==="look"?"问他：今天最想记住哪一刻？":"问他：婚后最想一起做什么？";
+                const question=kind==="question"
+                  ? `USER问${partnerDisplayName()}：“今天什么时候最紧张？”`
+                  : kind==="look"
+                  ? `USER问${partnerDisplayName()}：“今天最想记住哪一刻？”`
+                  : `USER问${partnerDisplayName()}：“婚后最想一起做什么？”`;
+                await withGenerateButton(el,"他正在回答你",async()=>{
+                  const t=await weddingSceneText(
+                    `喜宴已经结束，两人已经归房。今天所有礼仪都完成了，房里只剩 USER 与${partnerDisplayName()}。\n\n${ctx?`这是花烛夜已经发生的连续前文，请严格接着写：\n${ctx}\n\n`:""}${question} 请续写他的真实回答与少量自然动作。不要重新开场，不要总结前文，不要突然结束花烛夜。`,220);
+                  await appendStoryTurn("nightStory",label,t,"night");
                 });
                 return renderNightV5();
               }
